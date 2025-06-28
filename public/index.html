@@ -1,0 +1,1058 @@
+
+<title>INTELLCAP Project Evaluation</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+  :root {
+    --primary-color: #3a7bd5;
+    --secondary-color: #00d2ff;
+    --text-color: #333;
+    --background-color: rgba(255, 255, 255, 0.9);
+  }
+
+  body {
+    font-family: 'Poppins', sans-serif;
+    line-height: 1.6;
+    color: var(--text-color);
+    margin: 0;
+    padding: 0;
+    background-image: url('https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+  }
+
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 20px;
+  }
+
+  .intro-section {
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 30px;
+    border-radius: 8px;
+    margin-bottom: 40px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    backdrop-filter: blur(10px);
+  }
+
+  .intro-section h2 {
+    font-size: 2em;
+    color: var(--primary-color);
+    margin-bottom: 20px;
+    text-align: center;
+    font-weight: 600;
+  }
+
+  .intro-section p {
+    font-size: 1.1em;
+    line-height: 1.6;
+    margin-bottom: 15px;
+    text-align: justify;
+  }
+
+  h1, h2 {
+    color: var(--primary-color);
+    text-align: center;
+    margin-bottom: 30px;
+  }
+
+  h1 {
+    font-size: 2.5em;
+    font-weight: 600;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 30px;
+  }
+
+  h2 {
+    font-size: 1.8em;
+    font-weight: 400;
+    margin-top: 40px;
+  }
+
+  form {
+    background-color: var(--background-color);
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    backdrop-filter: blur(10px);
+  }
+
+  .personal-info-form {
+    background-color: var(--background-color);
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    backdrop-filter: blur(10px);
+    margin-bottom: 40px;
+  }
+
+  .personal-info-form input[type="text"],
+  .personal-info-form input[type="tel"],
+  .personal-info-form input[type="email"] {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .personal-info-form input[type="text"]:focus,
+  .personal-info-form input[type="tel"]:focus,
+  .personal-info-form input[type="email"]:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(58, 123, 213, 0.2);
+  }
+
+  .form-group {
+    margin-bottom: 25px;
+  }
+
+  label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #555;
+  }
+
+  select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    appearance: none;
+    background-color: #fff;
+    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23007CB2%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.7em top 50%;
+    background-size: 0.65em auto;
+  }
+
+  select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(58, 123, 213, 0.2);
+  }
+
+  button[type="submit"] {
+    background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+    color: #fff;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: 500;
+    transition: opacity 0.3s ease, transform 0.2s ease;
+    display: block;
+    margin: 30px auto 0;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  button[type="submit"]:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+  }
+
+  .note {
+    font-size: 0.9em;
+    color: #666;
+    margin-top: 5px;
+    font-style: italic;
+  }
+
+  .contact-info {
+    margin-top: 20px;
+    text-align: center;
+  }
+
+  .contact-info a {
+    color: var(--primary-color);
+    text-decoration: none;
+    margin: 0 10px;
+  }
+
+  .qr-code {
+    text-align: center;
+    margin-top: 20px;
+  }
+
+  #totalScore {
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--primary-color);
+    background-color: rgba(255, 255, 255, 0.8);
+    border: 2px solid var(--primary-color);
+    border-radius: 4px;
+    padding: 10px;
+    width: 100px;
+    text-align: center;
+  }
+
+  .evaluation-summary {
+    text-align: center;
+    margin-top: 30px;
+  }
+
+  .evaluation-summary .form-group {
+    display: inline-block;
+    margin-bottom: 20px;
+  }
+
+  .evaluation-summary button[type="submit"] {
+    margin-top: 20px;
+  }
+
+  textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    resize: vertical;
+    min-height: 100px;
+  }
+
+  textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(58, 123, 213, 0.2);
+  }
+
+  .form-group input[type="checkbox"] {
+    margin-right: 10px;
+    vertical-align: middle;
+  }
+
+  .form-group label[for="acknowledgment"] {
+    display: inline;
+    vertical-align: middle;
+  }
+
+  @media (max-width: 600px) {
+    form {
+      padding: 20px;
+    }
+  }
+  
+  .captcha-container {
+    margin: 20px 0;
+  }
+
+  .captcha-box {
+    background: #f0f0f0;
+    padding: 10px;
+    border-radius: 4px;
+    font-size: 24px;
+    letter-spacing: 8px;
+    font-family: 'Courier New', monospace;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+    user-select: none;
+  }
+
+  #refreshCaptcha {
+    margin-left: 10px;
+    padding: 5px 10px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  #captchaInput {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <div class="intro-section">
+      <h2>Welcome to INTELLCAP Innovation Days Subscription & Evaluation Form</h2>
+      <p>
+        Innovation Days is an intensive five-day forum dedicated to learning by doing/hands-on though showcasing cutting-edge projects in the fields of health and sports, with a focus on Artificial Intelligence (AI), IoT/sensors, Digital Twins and Metaverse. This evaluation form is designed to carefully assess and select the most promising projects aligned with these themes. Our goal is to determine if these projects are comprehensive, innovative, and performant enough to be presented to our esteemed experts collaborators, sponsors, and stakeholders, mainly seed funding providers and investors.
+      </p>
+      <p>
+        We kindly ask you to be truthful and sincere in your evaluations and presentations, allowing us to assess each project fairly and impartially. By doing so, we can ensure that only the best and most impactful innovations are brought to the forefront during the event. Not covering all the criteria shall not be seen as a handicap, instead, it shall be considered as an opportunity for empowerment of your skills. You are invited to express freely your specific needs and the outcomes you are seeking for.
+      </p>
+    </div>
+
+    <h1>Personal Informations</h1>
+    <form id="personalInfoForm" class="personal-info-form">
+      <div class="form-group">
+        <label for="firstName">First Name:</label>
+        <input type="text" id="firstName" name="firstName" required>
+      </div>
+      <div class="form-group">
+        <label for="lastName">Last Name:</label>
+        <input type="text" id="lastName" name="lastName" required>
+      </div>
+      <div class="form-group">
+        <label for="phoneNumber">Phone Number:</label>
+        <input type="tel" id="phoneNumber" name="phoneNumber" required>
+      </div>
+      <div class="form-group">
+        <label for="emailAddress">Email Address:</label>
+        <input type="email" id="emailAddress" name="emailAddress" required>
+      </div>
+      <div class="form-group">
+        <label for="team">Team:</label>
+        <input type="text" id="team" name="team" required>
+      </div>
+      <div class="form-group">
+        <label for="projectName">Project Name:</label>
+        <input type="text" id="projectName" name="projectName" required>
+      </div>
+      <div class="form-group">
+        <label for="teamType">Team Type:</label>
+        <select id="teamType" name="teamType" required>
+          <option value="">Select</option>
+          <option value="individual">Individual</option>
+          <option value="team">Team</option>
+        </select>
+      </div>
+    </form>
+
+    <h1>Project Evaluation</h1>
+    <form id="projectEvaluationForm" action="http://localhost:3001/submit-evaluation" method="post">
+      <h2>Key Qualities</h2>
+
+      <div class="form-group">
+        <label for="passion">Level of Passion:</label>
+        <select id="passion" name="passion" required>
+          <option value="">Select</option>
+          <option value="1">Low</option>
+          <option value="2">Moderate</option>
+          <option value="3">High</option>
+          <option value="4">Very High</option>
+          <option value="5">Exceptional</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="motivation">Motivation:</label>
+        <select id="motivation" name="motivation" required>
+          <option value="">Select</option>
+          <option value="1">Low</option>
+          <option value="2">Moderate</option>
+          <option value="3">High</option>
+          <option value="4">Very High</option>
+          <option value="5">Exceptional</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="integrity">Integrity:</label>
+        <select id="integrity" name="integrity" required>
+          <option value="">Select</option>
+          <option value="1">Poor</option>
+          <option value="2">Fair</option>
+          <option value="3">Good</option>
+          <option value="4">Very Good</option>
+          <option value="5">Excellent</option>
+        </select>
+      </div>
+
+      <h2>Project Evaluation</h2>
+
+      <div class="form-group">
+        <label for="originality">Originality:</label>
+        <select id="originality" name="originality" required>
+          <option value="">Select</option>
+          <option value="1">Not Original</option>
+          <option value="2">Somewhat Original</option>
+          <option value="3">Original</option>
+          <option value="4">Very Original</option>
+          <option value="5">Groundbreaking</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="creativity">Creativity:</label>
+        <select id="creativity" name="creativity" required>
+          <option value="">Select</option>
+          <option value="1">Low</option>
+          <option value="2">Moderate</option>
+          <option value="3">High</option>
+          <option value="4">Very High</option>
+          <option value="5">Exceptional</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="feasibility">Feasibility:</label>
+        <select id="feasibility" name="feasibility" required>
+          <option value="">Select</option>
+          <option value="5">High complexity (e.g. deep tech)</option>
+          <option value="4">Moderately complex</option>
+          <option value="3">Moderate feasibility</option>
+          <option value="2">Highly feasible</option>
+          <option value="1">Easily implementable</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="scientificValue">Scientific Added-Value:</label>
+        <select id="scientificValue" name="scientificValue" required>
+          <option value="">Select</option>
+          <option value="1">Low</option>
+          <option value="2">Moderate</option>
+          <option value="3">High</option>
+          <option value="4">Very High</option>
+          <option value="5">Revolutionary</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="technologicalValue">Technological Added-Value:</label>
+        <select id="technologicalValue" name="technologicalValue" required>
+          <option value="">Select</option>
+          <option value="1">Low</option>
+          <option value="2">Moderate</option>
+          <option value="3">High</option>
+          <option value="4">Very High</option>
+          <option value="5">Groundbreaking</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="impact">Potential Socio-Economic-Environmental Impact:</label>
+        <select id="impact" name="impact" required>
+          <option value="">Select</option>
+          <option value="1">Minimal</option>
+          <option value="2">Low</option>
+          <option value="3">Moderate</option>
+          <option value="4">High</option>
+          <option value="5">Transformative</option>
+        </select>
+      </div>
+
+      <h2>Team Composition and Resources</h2>
+
+      <div class="form-group">
+        <label for="teamSize">Number of Project Members:</label>
+        <select id="teamSize" name="teamSize" required>
+          <option value="">Select</option>
+          <option value="1">1 (1 pt)</option>
+          <option value="2">2 (2 pts)</option>
+          <option value="3">3 (3 pts)</option>
+          <option value="4">4 (4 pts)</option>
+          <option value="5">5 (5 pts)</option>
+          <option value="6">6 (6 pts)</option>
+          <option value="7">7 (7 pts)</option>
+          <option value="8">8 (6 pts)</option>
+          <option value="9">9 (5 pts)</option>
+          <option value="10">10+ (4 pts)</option>
+        </select>
+        <p class="note">Note: Points awarded based on team size</p>
+      </div>
+
+      <div class="form-group">
+        <label for="participantQuality">Quality of Participants:</label>
+        <select id="participantQuality" name="participantQuality" required>
+          <option value="">Select</option>
+          <option value="1">Basic</option>
+          <option value="2">Good</option>
+          <option value="3">Very Good</option>
+          <option value="4">Excellent</option>
+          <option value="5">Outstanding</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="teamStrengths">Team Member Profiles (Strengths):</label>
+        <select id="teamStrengths" name="teamStrengths" required>
+          <option value="">Select</option>
+          <option value="1">Limited diversity</option>
+          <option value="2">Some diversity</option>
+          <option value="3">Good diversity</option>
+          <option value="4">Very diverse</option>
+          <option value="5">Exceptionally diverse and complementary</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="investedEffort">Invested Effort (hours):</label>
+        <select id="investedEffort" name="investedEffort" required>
+          <option value="">Select</option>
+          <option value="1">0-100</option>
+          <option value="2">101-200</option>
+          <option value="3">201-500</option>
+          <option value="4">501-1000</option>
+          <option value="5">1000+</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="investedResources">Invested Money and Equipment:</label>
+        <select id="investedResources" name="investedResources" required>
+          <option value="">Select</option>
+          <option value="1">0$-100$</option>
+          <option value="2">101$-500$</option>
+          <option value="3">501$-1000$</option>
+          <option value="4">1001$-10000$</option>
+          <option value="5">+10000$</option>
+        </select>
+      </div>
+
+      <h2>Project Maturity</h2>
+
+      <div class="form-group">
+        <label for="maturityLevel">Maturity Level:</label>
+        <select id="maturityLevel" name="maturityLevel" required>
+          <option value="">Select</option>
+          <option value="1">Idea (1 pt)</option>
+          <option value="2">Structured Project (2 pts)</option>
+          <option value="3">Proof of Concept (3 pts)</option>
+          <option value="4">Prototype (4 pts)</option>
+          <option value="5">Minimum Viable Product (5 pts)</option>
+        </select>
+        <p class="note">Note: Idea (1 pt), Structured Project (2 pts), PoC (3 pts), Prototype (4 pts), MVP (5 pts)</p>
+      </div>
+
+      <div class="form-group">
+        <label for="hrNeeds">Project Needs (Human Resources):</label>
+        <select id="hrNeeds" name="hrNeeds" required>
+          <option value="">Select</option>
+          <option value="1">Minimal</option>
+          <option value="2">Low</option>
+          <option value="3">Moderate</option>
+          <option value="4">High</option>
+          <option value="5">Extensive</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="investmentNeeds">Level of Investments Needed:</label>
+        <select id="investmentNeeds" name="investmentNeeds" required>
+          <option value="">Select</option>
+          <option value="1">Minimal</option>
+          <option value="2">Low</option>
+          <option value="3">Moderate</option>
+          <option value="4">High</option>
+          <option value="5">Very High</option>
+        </select>
+      </div>
+
+      <h2>Business Development</h2>
+
+      <div class="form-group">
+        <label for="businessPlan">Existence of a Business Plan:</label>
+        <select id="businessPlan" name="businessPlan" required>
+          <option value="">Select</option>
+          <option value="1">No plan</option>
+          <option value="2">Basic outline</option>
+          <option value="3">Partial plan</option>
+          <option value="4">Comprehensive plan</option>
+          <option value="5">Detailed and well-researched plan</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="businessModel">Existence of a Business Model:</label>
+        <select id="businessModel" name="businessModel" required>
+          <option value="">Select</option>
+          <option value="1">No model</option>
+          <option value="2">Basic concept</option>
+          <option value="3">Partially developed</option>
+          <option value="4">Well-defined</option>
+          <option value="5">Innovative and robust</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="developmentPlanning">Development Planning with Key Milestones:</label>
+        <select id="developmentPlanning" name="developmentPlanning" required>
+          <option value="">Select</option>
+          <option value="1">No planning</option>
+          <option value="2">Basic timeline</option>
+          <option value="3">Partial planning</option>
+          <option value="4">Detailed planning</option>
+          <option value="5">Comprehensive and flexible planning</option>
+        </select>
+      </div>
+
+      <h2>Technical Skills</h2>
+
+      <div class="form-group">
+        <label for="mathematics">Mastery of Mathematics:</label>
+        <select id="mathematics" name="mathematics" required>
+          <option value="">Select</option>
+          <option value="1">Basic</option>
+          <option value="2">Intermediate</option>
+          <option value="3">Advanced</option>
+          <option value="4">Expert</option>
+          <option value="5">Master</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="physics">Physics:</label>
+        <select id="physics" name="physics" required>
+          <option value="">Select</option>
+          <option value="1">Basic</option>
+          <option value="2">Intermediate</option>
+          <option value="3">Advanced</option>
+          <option value="4">Expert</option>
+          <option value="5">Master</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="mechanics">Mechanics:</label>
+        <select id="mechanics" name="mechanics" required>
+          <option value="">Select</option>
+          <option value="1">Basic</option>
+          <option value="2">Intermediate</option>
+          <option value="3">Advanced</option>
+          <option value="4">Expert</option>
+          <option value="5">Master</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="chemistry">Chemistry:</label>
+        <select id="chemistry" name="chemistry" required>
+          <option value="">Select</option>
+          <option value="1">Basic</option>
+          <option value="2">Intermediate</option>
+          <option value="3">Advanced</option>
+          <option value="4">Expert</option>
+          <option value="5">Master</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="biology">Biology:</label>
+        <select id="biology" name="biology" required>
+          <option value="">Select</option>
+          <option value="1">Basic</option>
+          <option value="2">Intermediate</option>
+          <option value="3">Advanced</option>
+          <option value="4">Expert</option>
+          <option value="5">Master</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="algorithmic">Algorithmic:</label>
+        <select id="algorithmic" name="algorithmic" required>
+          <option value="">Select</option>
+          <option value="1">Basic</option>
+          <option value="2">Intermediate</option>
+          <option value="3">Advanced</option>
+          <option value="4">Expert</option>
+          <option value="5">Master</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="ai">Artificial Intelligence & Deep Learning:</label>
+        <select id="ai" name="ai" required>
+          <option value="">Select</option>
+          <option value="1">Basic</option>
+          <option value="2">Intermediate</option>
+          <option value="3">Advanced</option>
+          <option value="4">Expert</option>
+          <option value="5">Master</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="coding">Coding Languages:</label>
+        <select id="coding" name="coding" required>
+          <option value="">Select</option>
+          <option value="1">Basic (1-2 languages)</option>
+          <option value="2">Intermediate (3-4 languages)</option>
+          <option value="3">Advanced (5-6 languages)</option>
+          <option value="4">Expert (7-8 languages)</option>
+          <option value="5">Master (9+ languages)</option>
+        </select>
+      </div>
+
+      <h2>Economics and Business Administration Skills</h2>
+
+      <div class="form-group">
+        <label for="financialAnalysis">Financial Analysis:</label>
+        <select id="financialAnalysis" name="financialAnalysis" required>
+          <option value="">Select</option>
+          <option value="1">Basic</option>
+          <option value="2">Intermediate</option>
+          <option value="3">Advanced</option>
+          <option value="4">Expert</option>
+          <option value="5">Master</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="marketAnalysis">Market Analysis:</label>
+        <select id="marketAnalysis" name="marketAnalysis" required>
+          <option value="">Select</option>
+          <option value="1">Basic</option>
+          <option value="2">Intermediate</option>
+          <option value="3">Advanced</option>
+          <option value="4">Expert</option>
+          <option value="5">Master</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="strategicPlanning">Strategic Planning:</label>
+        <select id="strategicPlanning" name="strategicPlanning" required>
+          <option value="">Select</option>
+          <option value="1">Basic</option>
+          <option value="2">Intermediate</option>
+          <option value="3">Advanced</option>
+          <option value="4">Expert</option>
+          <option value="5">Master</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="projectManagement">Project Management:</label>
+        <select id="projectManagement" name="projectManagement" required>
+          <option value="">Select</option>
+          <option value="1">Basic</option>
+          <option value="2">Intermediate</option>
+          <option value="3">Advanced</option>
+          <option value="4">Expert</option>
+          <option value="5">Master</option>
+        </select>
+      </div>
+
+      <h2>Soft Skills</h2>
+
+      <div class="form-group">
+        <label for="communication">Communication:</label>
+        <select id="communication" name="communication" required>
+          <option value="">Select</option>
+          <option value="1">Poor</option>
+          <option value="2">Fair</option>
+          <option value="3">Good</option>
+          <option value="4">Very Good</option>
+          <option value="5">Excellent</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="adaptability">Adaptability:</label>
+        <select id="adaptability" name="adaptability" required>
+          <option value="">Select</option>
+          <option value="1">Poor</option>
+          <option value="2">Fair</option>
+          <option value="3">Good</option>
+          <option value="4">Very Good</option>
+          <option value="5">Excellent</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="problemSolving">Problem-solving:</label>
+        <select id="problemSolving" name="problemSolving" required>
+          <option value="">Select</option>
+          <option value="1">Poor</option>
+          <option value="2">Fair</option>
+          <option value="3">Good</option>
+          <option value="4">Very Good</option>
+          <option value="5">Excellent</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="teamwork">Collaboration/Teamwork:</label>
+        <select id="teamwork" name="teamwork" required>
+          <option value="">Select</option>
+          <option value="1">Poor</option>
+          <option value="2">Fair</option>
+          <option value="3">Good</option>
+          <option value="4">Very Good</option>
+          <option value="5">Excellent</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="criticalThinking">Critical thinking:</label>
+        <select id="criticalThinking" name="criticalThinking" required>
+          <option value="">Select</option>
+          <option value="1">Poor</option>
+          <option value="2">Fair</option>
+          <option value="3">Good</option>
+          <option value="4">Very Good</option>
+          <option value="5">Excellent</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="curiosity">Curiosity/Continuous learning:</label>
+        <select id="curiosity" name="curiosity" required>
+          <option value="">Select</option>
+          <option value="1">Poor</option>
+          <option value="2">Fair</option>
+          <option value="3">Good</option>
+          <option value="4">Very Good</option>
+          <option value="5">Excellent</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="empathy">Empathy:</label>
+        <select id="empathy" name="empathy" required>
+          <option value="">Select</option>
+          <option value="1">Poor</option>
+          <option value="2">Fair</option>
+          <option value="3">Good</option>
+          <option value="4">Very Good</option>
+          <option value="5">Excellent</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="timeManagement">Time management:</label>
+        <select id="timeManagement" name="timeManagement" required>
+          <option value="">Select</option>
+          <option value="1">Poor</option>
+          <option value="2">Fair</option>
+          <option value="3">Good</option>
+          <option value="4">Very Good</option>
+          <option value="5">Excellent</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="leadership">Leadership:</label>
+        <select id="leadership" name="leadership" required>
+          <option value="">Select</option>
+          <option value="1">Poor</option>
+          <option value="2">Fair</option>
+          <option value="3">Good</option>
+          <option value="4">Very Good</option>
+          <option value="5">Excellent</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="detailOrientation">Detail orientation:</label>
+        <select id="detailOrientation" name="detailOrientation" required>
+          <option value="">Select</option>
+          <option value="1">Poor</option>
+          <option value="2">Fair</option>
+          <option value="3">Good</option>
+          <option value="4">Very Good</option>
+          <option value="5">Excellent</option>
+        </select>
+      </div>
+
+      <h2>Additional Criteria</h2>
+
+      <div class="form-group">
+        <label for="design">Design:</label>
+        <select id="design" name="design" required>
+          <option value="">Select</option>
+          <option value="1">Poor</option>
+          <option value="2">Fair</option>
+          <option value="3">Good</option>
+          <option value="4">Very Good</option>
+          <option value="5">Excellent</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="intellectualProperty">Intellectual Property:</label>
+        <select id="intellectualProperty" name="intellectualProperty" required>
+          <option value="">Select</option>
+          <option value="1">No protection</option>
+          <option value="2">Basic protection</option>
+          <option value="3">Partial protection</option>
+          <option value="4">Strong protection</option>
+          <option value="5">Comprehensive protection</option>
+        </select>
+        <p class="note">Note: This is related to the existence of a Patent, Royalties, Copyright, etc.</p>
+      </div>
+
+      <div class="form-group">
+        <label for="ipPatentStatus">IP/Patent status:</label>
+        <select id="ipPatentStatus" name="ipPatentStatus" required>
+          <option value="">Select</option>
+          <option value="1">Need to be evaluated</option>
+          <option value="2">Probably patentable</option>
+          <option value="3">Patentable but no patent is filed</option>
+          <option value="4">Pending patent</option>
+          <option value="5">Granted patent</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="quality">Quality:</label>
+        <select id="quality" name="quality" required>
+          <option value="">Select</option>
+          <option value="1">Poor</option>
+          <option value="2">Fair</option>
+          <option value="3">Good</option>
+          <option value="4">Very Good</option>
+          <option value="5">Excellent</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="formalizationCapacity">Formalization Capacity:</label>
+        <select id="formalizationCapacity" name="formalizationCapacity" required>
+          <option value="">Select</option>
+          <option value="1">Poor</option>
+          <option value="2">Fair</option>
+          <option value="3">Good</option>
+          <option value="4">Very Good</option>
+          <option value="5">Excellent</option>
+        </select>
+      </div>
+
+      <h2>Project Details</h2>
+      <div class="form-group">
+        <label for="projectDetails">Additional Project Information:</label>
+        <textarea id="projectDetails" name="projectDetails" rows="5" placeholder="Please provide any additional details about your project here..."></textarea>
+        <p class="note">Note: This section is optional and does not contribute to the total score.</p>
+      </div>
+
+      <h2>Acknowledgment</h2>
+      <div class="form-group">
+        <input type="checkbox" id="acknowledgment" name="acknowledgment" required>
+        <label for="acknowledgment">I hereby declare the authenticity of my declarations and inputs, and I accept its processing by INTELLCAP.</label>
+        <p class="note">I also understand that INTELLCAP, THE CONSTELLIUM and involved partners are professional entities with deeptech and high-tech knowledges, know-how and hundreds of innovative projects worldwide. As a matter of coincidence submitted projects may have some similarities with other submitted projects and/or with our own ones. Should such a situation happen, each party remain the owner of its project as initially submitted, this includes copyrights and patents.</p>
+      </div>
+
+      <h2>Participant Expectations</h2>
+      <div class="form-group">
+        <label for="expectations">Your Expectations and Needs:</label>
+        <textarea id="expectations" name="expectations" rows="5" placeholder="Please describe your specific needs and the outcomes you are seeking from participating in Innovation Days..."></textarea>
+      </div>
+
+      <h2>Evaluation Summary</h2>
+      <div class="evaluation-summary">
+        <div class="form-group">
+          <label for="totalScore">Total Score:</label>
+          <input type="text" id="totalScore" name="totalScore" readonly>
+        </div>
+        <p class="note">Note: Your score will be converted into a grant credit that will evolve innov-days along. Successful projects will be granted awards based on final score of cumulated credits and top ranking ones will be pitched for fund raising.</p>
+        
+        <!-- Add CAPTCHA -->
+        <div class="form-group captcha-container">
+          <label for="captcha">Anti-Spam Verification:</label>
+          <div class="captcha-box">
+            <span id="captchaText"></span>
+            <button type="button" id="refreshCaptcha">↻</button>
+          </div>
+          <input type="text" id="captchaInput" name="captchaInput" required placeholder="Enter the code above">
+        </div>
+        
+        <button type="submit">Submit Evaluation</button>
+      </div>
+
+      <div class="contact-info">
+        <p>Contact email: <a href="mailto:innovdays@intellcap.fr">innovdays@intellcap.fr</a> <a href="mailto:innovdays@theconstellium.com">innovdays@theconstellium.com</a></p>
+      </div>
+
+      <div class="qr-code">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://eurpreneur-evaluation.intellcap.org/" alt="QR Code to access this form" width="150" height="150">
+      </div>
+    </form>
+  </div>
+
+<script>
+    function generateCaptcha() {
+      const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      let captcha = '';
+      for (let i = 0; i < 6; i++) {
+        captcha += chars[Math.floor(Math.random() * chars.length)];
+      }
+      document.getElementById('captchaText').textContent = captcha;
+      return captcha;
+    }
+
+    let currentCaptcha = generateCaptcha();
+
+    document.getElementById('refreshCaptcha').addEventListener('click', () => {
+      currentCaptcha = generateCaptcha();
+    });
+
+    function calculateTotalScore() {
+      const form = document.getElementById('projectEvaluationForm');
+      const selects = form.querySelectorAll('select');
+      let totalScore = 0;
+
+      selects.forEach(select => {
+        if (select.value) {
+          totalScore += parseInt(select.value);
+        }
+      });
+
+      document.getElementById('totalScore').value = totalScore;
+    }
+
+    document.getElementById('projectEvaluationForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const captchaInput = document.getElementById('captchaInput').value.toUpperCase();
+      if (captchaInput !== currentCaptcha) {
+        alert('Invalid CAPTCHA code. Please try again.');
+        return;
+      }
+      
+      calculateTotalScore();
+
+      if (!document.getElementById('acknowledgment').checked) {
+        alert('Please acknowledge the declaration before submitting.');
+        return;
+      }
+
+      const personalInfoForm = document.getElementById('personalInfoForm');
+      const formData = new FormData(this);
+      const personalData = new FormData(personalInfoForm);
+      
+      const jsonData = {};
+      formData.forEach((value, key) => {
+        jsonData[key] = value;
+      });
+      personalData.forEach((value, key) => {
+        jsonData[key] = value;
+      });
+
+      jsonData['acknowledgment'] = document.getElementById('acknowledgment').checked;
+
+      try {
+        const response = await fetch('http://localhost:3001/submit-evaluation', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(jsonData)
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          alert('Evaluation submitted successfully!');
+          this.reset();
+          personalInfoForm.reset();
+          document.getElementById('totalScore').value = '';
+          document.getElementById('captchaInput').value = '';
+          currentCaptcha = generateCaptcha();
+        } else {
+          throw new Error('Server responded with error');
+        }
+      } catch (error) {
+        console.error('Error submitting evaluation:', error);
+        alert('Error submitting evaluation. Please try again.');
+      }
+    });
+  </script>
+</body></html>
