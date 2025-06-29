@@ -142,6 +142,22 @@ app.get('/test-db', (req, res) => {
   });
 });
 
+app.get('/debug-schema', (req, res) => {
+  db.all("PRAGMA table_info(evaluations)", (err, rows) => {
+    if (err) {
+      res.status(500).json({ error: err.message });
+    } else {
+      const columns = rows.map(row => row.name);
+      res.json({
+        totalColumns: rows.length,
+        columns: columns,
+        columnsWithoutId: columns.filter(col => col !== 'id' && col !== 'created_at'),
+        insertableColumns: columns.filter(col => col !== 'id' && col !== 'created_at').length
+      });
+    }
+  });
+});
+
 // POST route for submitting evaluations with improved error handling
 app.post('/submit-evaluation', (req, res) => {
   console.log('Received evaluation submission:', {
@@ -149,10 +165,21 @@ app.post('/submit-evaluation', (req, res) => {
     path: req.path,
     origin: req.headers.origin,
     contentType: req.headers['content-type'],
-    bodyKeys: Object.keys(req.body || {})
+    bodyKeys: Object.keys(req.body || {}),
+    bodyKeysCount: Object.keys(req.body || {}).length
   });
 
   const data = req.body;
+  
+  // Log the actual data for debugging
+  console.log('Form data received:', {
+    firstName: data.firstName,
+    lastName: data.lastName,
+    emailAddress: data.emailAddress,
+    projectName: data.projectName,
+    acknowledgment: data.acknowledgment,
+    captchaInput: data.captchaInput
+  });
   
   // Validate required fields
   if (!data.firstName || !data.lastName || !data.emailAddress || !data.projectName) {
@@ -218,16 +245,24 @@ app.post('/submit-evaluation', (req, res) => {
   ];
 
   console.log('Attempting database insert...');
+  console.log('SQL columns count:', (sql.match(/,/g) || []).length + 1);
+  console.log('Params count:', params.length);
+  console.log('First few params:', params.slice(0, 10));
   
   db.run(sql, params, function(err) {
     if (err) {
       console.error('Database error:', err);
-      console.error('SQL:', sql);
-      console.error('Params length:', params.length);
+      console.error('SQL columns expected:', (sql.match(/,/g) || []).length + 1);
+      console.error('Params provided:', params.length);
+      console.error('Params:', params);
       res.status(500).json({ 
         error: 'Database error',
         message: err.message,
-        code: err.code || 'UNKNOWN'
+        code: err.code || 'UNKNOWN',
+        debug: {
+          sqlColumnsCount: (sql.match(/,/g) || []).length + 1,
+          paramsCount: params.length
+        }
       });
     } else {
       console.log('Evaluation submitted successfully, ID:', this.lastID);
