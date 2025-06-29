@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>INTELLCAP Evaluation Dashboard</title>
+  <title>INTELLCAP - Tableau de Bord</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
@@ -259,7 +259,7 @@
       </div>
       <div>
         <button class="btn btn-primary" onclick="refreshData()">
-          <i class="fas fa-sync-alt"></i> Refresh
+          <i class="fas fa-sync-alt"></i> Actualiser
         </button>
       </div>
     </header>
@@ -267,22 +267,22 @@
     <div class="stats">
       <div class="stat-card">
         <div class="icon"><i class="fas fa-users"></i></div>
-        <h3>Total Evaluations</h3>
+        <h3>Évaluations Totales</h3>
         <p id="totalEvaluations">0</p>
       </div>
       <div class="stat-card">
         <div class="icon"><i class="fas fa-star"></i></div>
-        <h3>Average Score</h3>
+        <h3>Score Moyen</h3>
         <p id="averageScore">0</p>
       </div>
       <div class="stat-card">
         <div class="icon"><i class="fas fa-project-diagram"></i></div>
-        <h3>Projects</h3>
+        <h3>Projets</h3>
         <p id="totalProjects">0</p>
       </div>
       <div class="stat-card">
         <div class="icon"><i class="fas fa-user-friends"></i></div>
-        <h3>Teams</h3>
+        <h3>Équipes</h3>
         <p id="totalTeams">0</p>
       </div>
     </div>
@@ -292,17 +292,17 @@
         <thead>
           <tr>
             <th>ID</th>
-            <th>Name</th>
-            <th>Project</th>
-            <th>Team</th>
+            <th>Nom</th>
+            <th>Projet</th>
+            <th>Équipe</th>
             <th>Score</th>
             <th>Date</th>
-            <th>Status</th>
+            <th>Statut</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          <!-- Data will be inserted here by JavaScript -->
+          <!-- Les données seront insérées ici par JavaScript -->
         </tbody>
       </table>
     </div>
@@ -310,69 +310,69 @@
     <div id="metricsView" class="hidden">
       <div class="metrics-container">
         <button class="btn btn-outline" onclick="backToList()">
-          <i class="fas fa-arrow-left"></i> Back to list
+          <i class="fas fa-arrow-left"></i> Retour
         </button>
         
         <h1 id="evaluationTitle" style="margin: 1rem 0;"></h1>
         
         <div class="metrics-section">
-          <h2>Key Qualities</h2>
+          <h2>Qualités Clés</h2>
           <div class="metrics-grid" id="keyQualities">
-            <!-- Filled by JavaScript -->
+            <!-- Rempli par JavaScript -->
           </div>
         </div>
         
         <div class="metrics-section">
-          <h2>Project Evaluation</h2>
+          <h2>Évaluation du Projet</h2>
           <div class="metrics-grid" id="projectEvaluation">
-            <!-- Filled by JavaScript -->
+            <!-- Rempli par JavaScript -->
           </div>
         </div>
         
         <div class="metrics-section">
-          <h2>Team Composition</h2>
+          <h2>Composition d'Équipe</h2>
           <div class="metrics-grid" id="teamComposition">
-            <!-- Filled by JavaScript -->
+            <!-- Rempli par JavaScript -->
           </div>
         </div>
         
         <div class="metrics-section">
-          <h2>Technical Skills</h2>
+          <h2>Compétences Techniques</h2>
           <div class="metrics-grid" id="technicalSkills">
-            <!-- Filled by JavaScript -->
+            <!-- Rempli par JavaScript -->
           </div>
         </div>
         
         <div class="metrics-section">
-          <h2>Business Skills</h2>
+          <h2>Compétences Métier</h2>
           <div class="metrics-grid" id="businessSkills">
-            <!-- Filled by JavaScript -->
+            <!-- Rempli par JavaScript -->
           </div>
         </div>
         
         <div class="metrics-section">
           <h2>Soft Skills</h2>
           <div class="metrics-grid" id="softSkills">
-            <!-- Filled by JavaScript -->
+            <!-- Rempli par JavaScript -->
           </div>
         </div>
         
         <div class="metrics-section">
-          <h2>Additional Criteria</h2>
+          <h2>Critères Additionnels</h2>
           <div class="metrics-grid" id="additionalCriteria">
-            <!-- Filled by JavaScript -->
+            <!-- Rempli par JavaScript -->
           </div>
         </div>
         
         <div class="metrics-section">
-          <h2>Project Details</h2>
+          <h2>Détails du Projet</h2>
           <div id="projectDetails" style="background: #f9f9f9; padding: 1rem; border-radius: 8px;">
             <p id="detailsText"></p>
           </div>
         </div>
         
         <div class="metrics-section">
-          <h2>Expectations</h2>
+          <h2>Attentes</h2>
           <div id="expectations" style="background: #f9f9f9; padding: 1rem; border-radius: 8px;">
             <p id="expectationsText"></p>
           </div>
@@ -382,19 +382,27 @@
   </div>
 
   <script>
+    // Configuration de base
+    const API_BASE_URL = ''; // Utilise les URLs relatives
     let currentEvaluation = null;
     
-    // Fetch and display data
+    // Chargement des données
     async function fetchData() {
       try {
-        const response = await fetch('/evaluations');
+        showLoader();
+        const response = await fetch(`${API_BASE_URL}/evaluations`);
+        if (!response.ok) throw new Error(`Erreur ${response.status}`);
         const data = await response.json();
         displayList(data);
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error("Erreur:", error);
+        showError("Erreur de chargement des données");
+      } finally {
+        hideLoader();
       }
     }
     
+    // Affichage de la liste
     function displayList(evaluations) {
       document.getElementById('metricsView').classList.add('hidden');
       document.getElementById('evaluationsTable').style.display = 'table';
@@ -402,7 +410,7 @@
       const tableBody = document.querySelector('#evaluationsTable tbody');
       tableBody.innerHTML = '';
       
-      // Update stats
+      // Mise à jour des stats
       document.getElementById('totalEvaluations').textContent = evaluations.length;
       
       const totalScore = evaluations.reduce((sum, eval) => sum + (eval.totalScore || 0), 0);
@@ -415,7 +423,7 @@
       const uniqueTeams = [...new Set(evaluations.map(e => e.team))];
       document.getElementById('totalTeams').textContent = uniqueTeams.length;
       
-      // Populate table
+      // Remplissage du tableau
       evaluations.forEach(eval => {
         const row = document.createElement('tr');
         
@@ -435,7 +443,7 @@
           <td><span class="badge ${statusClass}">${getStatusText(score)}</span></td>
           <td>
             <button class="btn btn-outline" onclick="viewDetails(${eval.id})">
-              <i class="fas fa-eye"></i> View Metrics
+              <i class="fas fa-eye"></i> Voir
             </button>
           </td>
         `;
@@ -443,101 +451,108 @@
       });
     }
     
+    // Détails d'une évaluation
     async function viewDetails(id) {
       try {
-        const response = await fetch(`/evaluations/${id}`);
+        showLoader();
+        const response = await fetch(`${API_BASE_URL}/evaluations/${id}`);
+        if (!response.ok) throw new Error('Erreur de chargement');
         currentEvaluation = await response.json();
         showMetrics(currentEvaluation);
       } catch (error) {
-        console.error('Error fetching evaluation details:', error);
+        console.error("Erreur:", error);
+        showError("Impossible de charger les détails");
+      } finally {
+        hideLoader();
       }
     }
     
+    // Affichage des métriques
     function showMetrics(eval) {
       document.getElementById('evaluationsTable').style.display = 'none';
       document.getElementById('metricsView').classList.remove('hidden');
       
       document.getElementById('evaluationTitle').textContent = 
-        `Evaluation #${eval.id}: ${eval.firstName} ${eval.lastName} - ${eval.projectName}`;
+        `Évaluation #${eval.id}: ${eval.firstName} ${eval.lastName} - ${eval.projectName}`;
       
-      // Key Qualities
+      // Qualités Clés
       document.getElementById('keyQualities').innerHTML = `
         ${createMetricCard('Passion', eval.passion)}
         ${createMetricCard('Motivation', eval.motivation)}
-        ${createMetricCard('Integrity', eval.integrity)}
+        ${createMetricCard('Intégrité', eval.integrity)}
       `;
       
-      // Project Evaluation
+      // Évaluation Projet
       document.getElementById('projectEvaluation').innerHTML = `
-        ${createMetricCard('Originality', eval.originality)}
-        ${createMetricCard('Creativity', eval.creativity)}
-        ${createMetricCard('Feasibility', eval.feasibility)}
-        ${createMetricCard('Scientific Value', eval.scientificValue)}
-        ${createMetricCard('Technological Value', eval.technologicalValue)}
+        ${createMetricCard('Originalité', eval.originality)}
+        ${createMetricCard('Créativité', eval.creativity)}
+        ${createMetricCard('Faisabilité', eval.feasibility)}
+        ${createMetricCard('Valeur Scientifique', eval.scientificValue)}
+        ${createMetricCard('Valeur Technologique', eval.technologicalValue)}
         ${createMetricCard('Impact', eval.impact)}
       `;
       
-      // Team Composition
+      // Composition Équipe
       document.getElementById('teamComposition').innerHTML = `
-        ${createMetricCard('Team Size', eval.teamSize)}
-        ${createMetricCard('Participant Quality', eval.participantQuality)}
-        ${createMetricCard('Team Strengths', eval.teamStrengths)}
-        ${createMetricCard('Invested Effort', eval.investedEffort)}
-        ${createMetricCard('Invested Resources', eval.investedResources)}
+        ${createMetricCard('Taille Équipe', eval.teamSize)}
+        ${createMetricCard('Qualité Participants', eval.participantQuality)}
+        ${createMetricCard('Forces Équipe', eval.teamStrengths)}
+        ${createMetricCard('Effort Investi', eval.investedEffort)}
+        ${createMetricCard('Ressources Investies', eval.investedResources)}
       `;
       
-      // Technical Skills
+      // Compétences Techniques
       document.getElementById('technicalSkills').innerHTML = `
-        ${createMetricCard('Mathematics', eval.mathematics)}
-        ${createMetricCard('Physics', eval.physics)}
-        ${createMetricCard('Mechanics', eval.mechanics)}
-        ${createMetricCard('Chemistry', eval.chemistry)}
-        ${createMetricCard('Biology', eval.biology)}
-        ${createMetricCard('Algorithmic', eval.algorithmic)}
-        ${createMetricCard('AI', eval.ai)}
-        ${createMetricCard('Coding', eval.coding)}
+        ${createMetricCard('Mathématiques', eval.mathematics)}
+        ${createMetricCard('Physique', eval.physics)}
+        ${createMetricCard('Mécanique', eval.mechanics)}
+        ${createMetricCard('Chimie', eval.chemistry)}
+        ${createMetricCard('Biologie', eval.biology)}
+        ${createMetricCard('Algorithmique', eval.algorithmic)}
+        ${createMetricCard('IA', eval.ai)}
+        ${createMetricCard('Programmation', eval.coding)}
       `;
       
-      // Business Skills
+      // Compétences Métier
       document.getElementById('businessSkills').innerHTML = `
-        ${createMetricCard('Financial Analysis', eval.financialAnalysis)}
-        ${createMetricCard('Market Analysis', eval.marketAnalysis)}
-        ${createMetricCard('Strategic Planning', eval.strategicPlanning)}
-        ${createMetricCard('Project Management', eval.projectManagement)}
+        ${createMetricCard('Analyse Financière', eval.financialAnalysis)}
+        ${createMetricCard('Analyse Marché', eval.marketAnalysis)}
+        ${createMetricCard('Planification Stratégique', eval.strategicPlanning)}
+        ${createMetricCard('Gestion Projet', eval.projectManagement)}
       `;
       
       // Soft Skills
       document.getElementById('softSkills').innerHTML = `
         ${createMetricCard('Communication', eval.communication)}
-        ${createMetricCard('Adaptability', eval.adaptability)}
-        ${createMetricCard('Problem Solving', eval.problemSolving)}
-        ${createMetricCard('Teamwork', eval.teamwork)}
-        ${createMetricCard('Critical Thinking', eval.criticalThinking)}
-        ${createMetricCard('Curiosity', eval.curiosity)}
-        ${createMetricCard('Empathy', eval.empathy)}
-        ${createMetricCard('Time Management', eval.timeManagement)}
+        ${createMetricCard('Adaptabilité', eval.adaptability)}
+        ${createMetricCard('Résolution Problèmes', eval.problemSolving)}
+        ${createMetricCard('Travail d'Équipe', eval.teamwork)}
+        ${createMetricCard('Esprit Critique', eval.criticalThinking)}
+        ${createMetricCard('Curiosité', eval.curiosity)}
+        ${createMetricCard('Empathie', eval.empathy)}
+        ${createMetricCard('Gestion du Temps', eval.timeManagement)}
         ${createMetricCard('Leadership', eval.leadership)}
-        ${createMetricCard('Detail Orientation', eval.detailOrientation)}
+        ${createMetricCard('Souci du Détail', eval.detailOrientation)}
       `;
       
-      // Additional Criteria
+      // Critères Additionnels
       document.getElementById('additionalCriteria').innerHTML = `
         ${createMetricCard('Design', eval.design)}
-        ${createMetricCard('Intellectual Property', eval.intellectualProperty)}
-        ${createMetricCard('IP Patent Status', eval.ipPatentStatus)}
-        ${createMetricCard('Quality', eval.quality)}
-        ${createMetricCard('Formalization Capacity', eval.formalizationCapacity)}
+        ${createMetricCard('Propriété Intellectuelle', eval.intellectualProperty)}
+        ${createMetricCard('Statut Brevet', eval.ipPatentStatus)}
+        ${createMetricCard('Qualité', eval.quality)}
+        ${createMetricCard('Capacité Formalisation', eval.formalizationCapacity)}
       `;
       
-      // Project Details
+      // Détails Projet
       document.getElementById('detailsText').textContent = 
-        eval.projectDetails || 'No additional project details provided';
+        eval.projectDetails || 'Aucun détail supplémentaire fourni';
       
-      // Expectations
+      // Attentes
       document.getElementById('expectationsText').textContent = 
-        eval.expectations || 'No expectations specified';
+        eval.expectations || 'Aucune attente spécifiée';
       
-      // Animate progress bars
+      // Animation des progress bars
       setTimeout(() => {
         document.querySelectorAll('.progress').forEach(bar => {
           const width = bar.parentElement.getAttribute('data-value') * 20;
@@ -546,6 +561,7 @@
       }, 100);
     }
     
+    // Création d'une carte métrique
     function createMetricCard(label, value) {
       return `
         <div class="metric-card">
@@ -558,24 +574,44 @@
       `;
     }
     
+    // Retour à la liste
     function backToList() {
       document.getElementById('metricsView').classList.add('hidden');
       document.getElementById('evaluationsTable').style.display = 'table';
     }
     
+    // Texte du statut
     function getStatusText(score) {
       if (score > 180) return 'Excellent';
-      if (score > 120) return 'Good';
-      if (score > 80) return 'Average';
-      return 'Needs Improvement';
+      if (score > 120) return 'Bon';
+      if (score > 80) return 'Moyen';
+      return 'À Améliorer';
     }
     
+    // Actualisation
     function refreshData() {
       fetchData();
     }
     
-    // Load data when page loads
-    document.addEventListener('DOMContentLoaded', fetchData);
+    // Gestion erreur
+    function showError(message) {
+      alert(message);
+    }
+    
+    // Loader (à ajouter dans votre CSS)
+    function showLoader() {
+      // Implémentez un loader si besoin
+    }
+    
+    function hideLoader() {
+      // Cachez le loader
+    }
+    
+    // Initialisation
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('Dashboard initialisé');
+      fetchData();
+    });
   </script>
 </body>
 </html>
