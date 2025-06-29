@@ -235,6 +235,31 @@
       display: none;
     }
     
+    .error-message {
+      background: #ffe6e6;
+      color: #d32f2f;
+      padding: 1rem;
+      border-radius: 8px;
+      margin: 1rem 0;
+      border-left: 4px solid #d32f2f;
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 2rem;
+      color: #666;
+    }
+    
+    .loading i {
+      font-size: 2rem;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
     @media (max-width: 768px) {
       .container {
         padding: 1rem;
@@ -263,6 +288,12 @@
         </button>
       </div>
     </header>
+    
+    <div id="errorContainer"></div>
+    <div id="loadingContainer" class="loading hidden">
+      <i class="fas fa-spinner"></i>
+      <p>Loading evaluations...</p>
+    </div>
     
     <div class="stats">
       <div class="stat-card">
@@ -384,14 +415,80 @@
   <script>
     let currentEvaluation = null;
     
+    // Configuration - change this to match your server
+    const API_BASE_URL = 'http://localhost:3001'; // Change this to your server URL
+    
+    // Utility function to make API calls
+    async function apiCall(endpoint, options = {}) {
+      try {
+        const url = `${API_BASE_URL}${endpoint}`;
+        console.log('Making API call to:', url);
+        
+        const response = await fetch(url, {
+          ...options,
+          headers: {
+            'Content-Type': 'application/json',
+            ...options.headers
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        return await response.json();
+      } catch (error) {
+        console.error('API call failed:', error);
+        throw error;
+      }
+    }
+    
+    // Show error message
+    function showError(message) {
+      const errorContainer = document.getElementById('errorContainer');
+      errorContainer.innerHTML = `
+        <div class="error-message">
+          <i class="fas fa-exclamation-triangle"></i>
+          <strong>Error:</strong> ${message}
+          <br>
+          <small>Make sure your server is running on ${API_BASE_URL}</small>
+        </div>
+      `;
+    }
+    
+    // Clear error message
+    function clearError() {
+      document.getElementById('errorContainer').innerHTML = '';
+    }
+    
+    // Show loading
+    function showLoading() {
+      document.getElementById('loadingContainer').classList.remove('hidden');
+    }
+    
+    // Hide loading
+    function hideLoading() {
+      document.getElementById('loadingContainer').classList.add('hidden');
+    }
+    
     // Fetch and display data
     async function fetchData() {
       try {
-        const response = await fetch('/evaluations');
-        const data = await response.json();
+        clearError();
+        showLoading();
+        
+        const data = await apiCall('/evaluations');
+        console.log('Fetched evaluations:', data);
+        
+        hideLoading();
         displayList(data);
       } catch (error) {
+        hideLoading();
         console.error('Error fetching data:', error);
+        showError(`Failed to fetch evaluations: ${error.message}`);
+        
+        // Show empty state
+        displayList([]);
       }
     }
     
@@ -405,51 +502,77 @@
       // Update stats
       document.getElementById('totalEvaluations').textContent = evaluations.length;
       
-      const totalScore = evaluations.reduce((sum, eval) => sum + (eval.totalScore || 0), 0);
-      const avgScore = evaluations.length > 0 ? (totalScore / evaluations.length).toFixed(1) : 0;
-      document.getElementById('averageScore').textContent = avgScore;
-      
-      const uniqueProjects = [...new Set(evaluations.map(e => e.projectName))];
-      document.getElementById('totalProjects').textContent = uniqueProjects.length;
-      
-      const uniqueTeams = [...new Set(evaluations.map(e => e.team))];
-      document.getElementById('totalTeams').textContent = uniqueTeams.length;
-      
-      // Populate table
-      evaluations.forEach(eval => {
+      if (evaluations.length > 0) {
+        const totalScore = evaluations.reduce((sum, eval) => sum + (eval.totalScore || 0), 0);
+        const avgScore = (totalScore / evaluations.length).toFixed(1);
+        document.getElementById('averageScore').textContent = avgScore;
+        
+        const uniqueProjects = [...new Set(evaluations.map(e => e.projectName).filter(p => p))];
+        document.getElementById('totalProjects').textContent = uniqueProjects.length;
+        
+        const uniqueTeams = [...new Set(evaluations.map(e => e.team).filter(t => t))];
+        document.getElementById('totalTeams').textContent = uniqueTeams.length;
+        
+        // Populate table
+        evaluations.forEach(eval => {
+          const row = document.createElement('tr');
+          
+          const score = eval.totalScore || 0;
+          let statusClass = 'badge-primary';
+          if (score > 180) statusClass = 'badge-success';
+          else if (score > 120) statusClass = 'badge-warning';
+          else if (score <= 120) statusClass = 'badge-danger';
+          
+          const firstName = eval.firstName || '';
+          const lastName = eval.lastName || '';
+          const projectName = eval.projectName || 'N/A';
+          const team = eval.team || 'N/A';
+          const createdAt = eval.created_at ? new Date(eval.created_at).toLocaleDateString() : 'N/A';
+          
+          row.innerHTML = `
+            <td>${eval.id}</td>
+            <td>${firstName} ${lastName}</td>
+            <td>${projectName}</td>
+            <td>${team}</td>
+            <td>${score}</td>
+            <td>${createdAt}</td>
+            <td><span class="badge ${statusClass}">${getStatusText(score)}</span></td>
+            <td>
+              <button class="btn btn-outline" onclick="viewDetails(${eval.id})">
+                <i class="fas fa-eye"></i> View Metrics
+              </button>
+            </td>
+          `;
+          tableBody.appendChild(row);
+        });
+      } else {
+        // Show empty state
+        document.getElementById('averageScore').textContent = '0';
+        document.getElementById('totalProjects').textContent = '0';
+        document.getElementById('totalTeams').textContent = '0';
+        
         const row = document.createElement('tr');
-        
-        const score = eval.totalScore || 0;
-        let statusClass = 'badge-primary';
-        if (score > 180) statusClass = 'badge-success';
-        else if (score > 120) statusClass = 'badge-warning';
-        else if (score <= 120) statusClass = 'badge-danger';
-        
         row.innerHTML = `
-          <td>${eval.id}</td>
-          <td>${eval.firstName} ${eval.lastName}</td>
-          <td>${eval.projectName}</td>
-          <td>${eval.team}</td>
-          <td>${score}</td>
-          <td>${new Date(eval.created_at).toLocaleDateString()}</td>
-          <td><span class="badge ${statusClass}">${getStatusText(score)}</span></td>
-          <td>
-            <button class="btn btn-outline" onclick="viewDetails(${eval.id})">
-              <i class="fas fa-eye"></i> View Metrics
-            </button>
+          <td colspan="8" style="text-align: center; padding: 2rem; color: #666;">
+            <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 1rem; display: block;"></i>
+            No evaluations found. Submit some evaluations first!
           </td>
         `;
         tableBody.appendChild(row);
-      });
+      }
     }
     
     async function viewDetails(id) {
       try {
-        const response = await fetch(`/evaluations/${id}`);
-        currentEvaluation = await response.json();
-        showMetrics(currentEvaluation);
+        clearError();
+        const evaluation = await apiCall(`/evaluations/${id}`);
+        console.log('Fetched evaluation details:', evaluation);
+        
+        currentEvaluation = evaluation;
+        showMetrics(evaluation);
       } catch (error) {
         console.error('Error fetching evaluation details:', error);
+        showError(`Failed to fetch evaluation details: ${error.message}`);
       }
     }
     
@@ -457,76 +580,80 @@
       document.getElementById('evaluationsTable').style.display = 'none';
       document.getElementById('metricsView').classList.remove('hidden');
       
+      const firstName = eval.firstName || '';
+      const lastName = eval.lastName || '';
+      const projectName = eval.projectName || 'Unknown Project';
+      
       document.getElementById('evaluationTitle').textContent = 
-        `Evaluation #${eval.id}: ${eval.firstName} ${eval.lastName} - ${eval.projectName}`;
+        `Evaluation #${eval.id}: ${firstName} ${lastName} - ${projectName}`;
       
       // Key Qualities
       document.getElementById('keyQualities').innerHTML = `
-        ${createMetricCard('Passion', eval.passion)}
-        ${createMetricCard('Motivation', eval.motivation)}
-        ${createMetricCard('Integrity', eval.integrity)}
+        ${createMetricCard('Passion', eval.passion || 0)}
+        ${createMetricCard('Motivation', eval.motivation || 0)}
+        ${createMetricCard('Integrity', eval.integrity || 0)}
       `;
       
       // Project Evaluation
       document.getElementById('projectEvaluation').innerHTML = `
-        ${createMetricCard('Originality', eval.originality)}
-        ${createMetricCard('Creativity', eval.creativity)}
-        ${createMetricCard('Feasibility', eval.feasibility)}
-        ${createMetricCard('Scientific Value', eval.scientificValue)}
-        ${createMetricCard('Technological Value', eval.technologicalValue)}
-        ${createMetricCard('Impact', eval.impact)}
+        ${createMetricCard('Originality', eval.originality || 0)}
+        ${createMetricCard('Creativity', eval.creativity || 0)}
+        ${createMetricCard('Feasibility', eval.feasibility || 0)}
+        ${createMetricCard('Scientific Value', eval.scientificValue || 0)}
+        ${createMetricCard('Technological Value', eval.technologicalValue || 0)}
+        ${createMetricCard('Impact', eval.impact || 0)}
       `;
       
       // Team Composition
       document.getElementById('teamComposition').innerHTML = `
-        ${createMetricCard('Team Size', eval.teamSize)}
-        ${createMetricCard('Participant Quality', eval.participantQuality)}
-        ${createMetricCard('Team Strengths', eval.teamStrengths)}
-        ${createMetricCard('Invested Effort', eval.investedEffort)}
-        ${createMetricCard('Invested Resources', eval.investedResources)}
+        ${createMetricCard('Team Size', eval.teamSize || 0)}
+        ${createMetricCard('Participant Quality', eval.participantQuality || 0)}
+        ${createMetricCard('Team Strengths', eval.teamStrengths || 0)}
+        ${createMetricCard('Invested Effort', eval.investedEffort || 0)}
+        ${createMetricCard('Invested Resources', eval.investedResources || 0)}
       `;
       
       // Technical Skills
       document.getElementById('technicalSkills').innerHTML = `
-        ${createMetricCard('Mathematics', eval.mathematics)}
-        ${createMetricCard('Physics', eval.physics)}
-        ${createMetricCard('Mechanics', eval.mechanics)}
-        ${createMetricCard('Chemistry', eval.chemistry)}
-        ${createMetricCard('Biology', eval.biology)}
-        ${createMetricCard('Algorithmic', eval.algorithmic)}
-        ${createMetricCard('AI', eval.ai)}
-        ${createMetricCard('Coding', eval.coding)}
+        ${createMetricCard('Mathematics', eval.mathematics || 0)}
+        ${createMetricCard('Physics', eval.physics || 0)}
+        ${createMetricCard('Mechanics', eval.mechanics || 0)}
+        ${createMetricCard('Chemistry', eval.chemistry || 0)}
+        ${createMetricCard('Biology', eval.biology || 0)}
+        ${createMetricCard('Algorithmic', eval.algorithmic || 0)}
+        ${createMetricCard('AI', eval.ai || 0)}
+        ${createMetricCard('Coding', eval.coding || 0)}
       `;
       
       // Business Skills
       document.getElementById('businessSkills').innerHTML = `
-        ${createMetricCard('Financial Analysis', eval.financialAnalysis)}
-        ${createMetricCard('Market Analysis', eval.marketAnalysis)}
-        ${createMetricCard('Strategic Planning', eval.strategicPlanning)}
-        ${createMetricCard('Project Management', eval.projectManagement)}
+        ${createMetricCard('Financial Analysis', eval.financialAnalysis || 0)}
+        ${createMetricCard('Market Analysis', eval.marketAnalysis || 0)}
+        ${createMetricCard('Strategic Planning', eval.strategicPlanning || 0)}
+        ${createMetricCard('Project Management', eval.projectManagement || 0)}
       `;
       
       // Soft Skills
       document.getElementById('softSkills').innerHTML = `
-        ${createMetricCard('Communication', eval.communication)}
-        ${createMetricCard('Adaptability', eval.adaptability)}
-        ${createMetricCard('Problem Solving', eval.problemSolving)}
-        ${createMetricCard('Teamwork', eval.teamwork)}
-        ${createMetricCard('Critical Thinking', eval.criticalThinking)}
-        ${createMetricCard('Curiosity', eval.curiosity)}
-        ${createMetricCard('Empathy', eval.empathy)}
-        ${createMetricCard('Time Management', eval.timeManagement)}
-        ${createMetricCard('Leadership', eval.leadership)}
-        ${createMetricCard('Detail Orientation', eval.detailOrientation)}
+        ${createMetricCard('Communication', eval.communication || 0)}
+        ${createMetricCard('Adaptability', eval.adaptability || 0)}
+        ${createMetricCard('Problem Solving', eval.problemSolving || 0)}
+        ${createMetricCard('Teamwork', eval.teamwork || 0)}
+        ${createMetricCard('Critical Thinking', eval.criticalThinking || 0)}
+        ${createMetricCard('Curiosity', eval.curiosity || 0)}
+        ${createMetricCard('Empathy', eval.empathy || 0)}
+        ${createMetricCard('Time Management', eval.timeManagement || 0)}
+        ${createMetricCard('Leadership', eval.leadership || 0)}
+        ${createMetricCard('Detail Orientation', eval.detailOrientation || 0)}
       `;
       
       // Additional Criteria
       document.getElementById('additionalCriteria').innerHTML = `
-        ${createMetricCard('Design', eval.design)}
-        ${createMetricCard('Intellectual Property', eval.intellectualProperty)}
-        ${createMetricCard('IP Patent Status', eval.ipPatentStatus)}
-        ${createMetricCard('Quality', eval.quality)}
-        ${createMetricCard('Formalization Capacity', eval.formalizationCapacity)}
+        ${createMetricCard('Design', eval.design || 0)}
+        ${createMetricCard('Intellectual Property', eval.intellectualProperty || 0)}
+        ${createMetricCard('IP Patent Status', eval.ipPatentStatus || 0)}
+        ${createMetricCard('Quality', eval.quality || 0)}
+        ${createMetricCard('Formalization Capacity', eval.formalizationCapacity || 0)}
       `;
       
       // Project Details
@@ -547,11 +674,12 @@
     }
     
     function createMetricCard(label, value) {
+      const numValue = Number(value) || 0;
       return `
         <div class="metric-card">
           <h3>${label}</h3>
-          <p>${value}/5</p>
-          <div class="progress-bar" data-value="${value}">
+          <p>${numValue}/5</p>
+          <div class="progress-bar" data-value="${numValue}">
             <div class="progress"></div>
           </div>
         </div>
@@ -575,7 +703,10 @@
     }
     
     // Load data when page loads
-    document.addEventListener('DOMContentLoaded', fetchData);
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('Dashboard loaded, fetching data...');
+      fetchData();
+    });
   </script>
 </body>
 </html>
