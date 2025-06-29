@@ -195,6 +195,7 @@ app.post('/submit-evaluation', (req, res) => {
     });
   }
 
+  // Fixed SQL with correct number of placeholders (57 columns = 57 placeholders)
   const sql = `
     INSERT INTO evaluations (
       firstName, lastName, phoneNumber, emailAddress, team, projectName, teamType,
@@ -210,7 +211,7 @@ app.post('/submit-evaluation', (req, res) => {
     ) VALUES (
       ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 
       ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 
-      ?, ?, ?, ?, ?
+      ?, ?, ?, ?, ?, ?
     )`;
 
   const params = [
@@ -245,14 +246,14 @@ app.post('/submit-evaluation', (req, res) => {
   ];
 
   console.log('Attempting database insert...');
-  console.log('SQL columns count:', (sql.match(/,/g) || []).length + 1);
+  console.log('SQL columns count:', (sql.match(/\?/g) || []).length);
   console.log('Params count:', params.length);
   console.log('First few params:', params.slice(0, 10));
   
   db.run(sql, params, function(err) {
     if (err) {
       console.error('Database error:', err);
-      console.error('SQL columns expected:', (sql.match(/,/g) || []).length + 1);
+      console.error('SQL placeholders count:', (sql.match(/\?/g) || []).length);
       console.error('Params provided:', params.length);
       console.error('Params:', params);
       res.status(500).json({ 
@@ -260,7 +261,7 @@ app.post('/submit-evaluation', (req, res) => {
         message: err.message,
         code: err.code || 'UNKNOWN',
         debug: {
-          sqlColumnsCount: (sql.match(/,/g) || []).length + 1,
+          sqlPlaceholdersCount: (sql.match(/\?/g) || []).length,
           paramsCount: params.length
         }
       });
