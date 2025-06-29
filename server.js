@@ -4,19 +4,39 @@ const cors = require('cors');
 const path = require('path');
 
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 
-// Middleware
-app.use(cors({
+// Improved CORS configuration
+const corsOptions = {
   origin: [
     'https://intellcap-evaluations.onrender.com',
-    'http://localhost:3000'
+    'http://localhost:3000',
+    'https://localhost:3000'
   ],
-  credentials: true
-}));
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: [
+    'Content-Type', 
+    'Authorization', 
+    'X-Requested-With',
+    'Accept',
+    'Origin'
+  ]
+};
 
-// Nouveau middleware à ajouter (juste après)
-app.options('*', cors()); // Pré-requêtes CORS
+// Middleware
+app.use(cors(corsOptions));
+
+// Handle preflight requests explicitly
+app.options('*', cors(corsOptions));
+
+// Add logging middleware for debugging
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+  console.log('Origin:', req.headers.origin);
+  next();
+});
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -97,13 +117,55 @@ db.serialize(() => {
   });
 });
 
-// POST route for submitting evaluations
+// Test endpoints for debugging
+app.get('/test', (req, res) => {
+  res.json({ 
+    message: 'Server is running',
+    timestamp: new Date().toISOString(),
+    env: process.env.NODE_ENV || 'development'
+  });
+});
+
+app.get('/test-db', (req, res) => {
+  db.get('SELECT COUNT(*) as count FROM evaluations', (err, row) => {
+    if (err) {
+      res.status(500).json({ 
+        error: 'Database connection failed',
+        message: err.message 
+      });
+    } else {
+      res.json({ 
+        message: 'Database connected successfully',
+        recordCount: row.count 
+      });
+    }
+  });
+});
+
+// POST route for submitting evaluations with improved error handling
 app.post('/submit-evaluation', (req, res) => {
+  console.log('Received evaluation submission:', {
+    method: req.method,
+    path: req.path,
+    origin: req.headers.origin,
+    contentType: req.headers['content-type'],
+    bodyKeys: Object.keys(req.body || {})
+  });
+
   const data = req.body;
   
   // Validate required fields
   if (!data.firstName || !data.lastName || !data.emailAddress || !data.projectName) {
-    return res.status(400).json({ error: 'Missing required fields' });
+    console.error('Missing required fields:', {
+      firstName: !!data.firstName,
+      lastName: !!data.lastName,
+      emailAddress: !!data.emailAddress,
+      projectName: !!data.projectName
+    });
+    return res.status(400).json({ 
+      error: 'Missing required fields',
+      required: ['firstName', 'lastName', 'emailAddress', 'projectName']
+    });
   }
 
   const sql = `
@@ -155,14 +217,20 @@ app.post('/submit-evaluation', (req, res) => {
     parseInt(data.totalScore) || 0
   ];
 
+  console.log('Attempting database insert...');
+  
   db.run(sql, params, function(err) {
     if (err) {
       console.error('Database error:', err);
+      console.error('SQL:', sql);
+      console.error('Params length:', params.length);
       res.status(500).json({ 
         error: 'Database error',
-        details: err.message
+        message: err.message,
+        code: err.code || 'UNKNOWN'
       });
     } else {
+      console.log('Evaluation submitted successfully, ID:', this.lastID);
       res.json({ 
         success: true, 
         id: this.lastID,
@@ -176,6 +244,7 @@ app.post('/submit-evaluation', (req, res) => {
 app.get('/evaluations', (req, res) => {
   db.all('SELECT * FROM evaluations ORDER BY created_at DESC', (err, rows) => {
     if (err) {
+      console.error('Error retrieving evaluations:', err);
       res.status(500).json({ error: 'Error retrieving evaluations' });
     } else {
       res.json(rows);
@@ -187,6 +256,7 @@ app.get('/evaluations', (req, res) => {
 app.get('/evaluations/:id', (req, res) => {
   db.get('SELECT * FROM evaluations WHERE id = ?', [req.params.id], (err, row) => {
     if (err) {
+      console.error('Error retrieving evaluation:', err);
       res.status(500).json({ error: 'Error retrieving evaluation' });
     } else if (!row) {
       res.status(404).json({ error: 'Evaluation not found' });
@@ -200,6 +270,7 @@ app.get('/evaluations/:id', (req, res) => {
 app.get('/evaluation-metrics/:id', (req, res) => {
   db.get('SELECT * FROM evaluations WHERE id = ?', [req.params.id], (err, row) => {
     if (err) {
+      console.error('Error retrieving evaluation metrics:', err);
       res.status(500).json({ error: 'Error retrieving evaluation metrics' });
     } else if (!row) {
       res.status(404).json({ error: 'Evaluation not found' });
@@ -299,6 +370,7 @@ app.get('/dashboard', (req, res) => {
 app.get('/export-csv', (req, res) => {
   db.all('SELECT * FROM evaluations ORDER BY created_at DESC', (err, rows) => {
     if (err) {
+      console.error('Error exporting data:', err);
       res.status(500).json({ error: 'Error exporting data' });
     } else if (rows.length === 0) {
       res.status(404).send('No data available');
@@ -316,14 +388,37 @@ app.get('/export-csv', (req, res) => {
   });
 });
 
+// Root endpoint
+app.get('/', (req, res) => {
+  res.json({
+    message: 'Evaluation API Server',
+    endpoints: {
+      test: '/test',
+      testDb: '/test-db',
+      submit: 'POST /submit-evaluation',
+      evaluations: '/evaluations',
+      dashboard: '/dashboard',
+      export: '/export-csv'
+    }
+  });
+});
+
 // Start server
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
   console.log(`Dashboard available at http://localhost:${PORT}/dashboard`);
+  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
 });
 
 // Graceful shutdown
 process.on('SIGINT', () => {
-  db.close();
-  process.exit(0);
+  console.log('Shutting down gracefully...');
+  db.close((err) => {
+    if (err) {
+      console.error('Error closing database:', err);
+    } else {
+      console.log('Database connection closed.');
+    }
+    process.exit(0);
+  });
 });
