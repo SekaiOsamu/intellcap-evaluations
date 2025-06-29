@@ -7,11 +7,16 @@ const app = express();
 const PORT = 3001;
 
 // Middleware
-app.use(cors());
-app.use((req, res, next) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
-  next();
-});
+app.use(cors({
+  origin: [
+    'https://intellcap-evaluations.onrender.com',
+    'http://localhost:3000'
+  ],
+  credentials: true
+}));
+
+// Nouveau middleware à ajouter (juste après)
+app.options('*', cors()); // Pré-requêtes CORS
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
