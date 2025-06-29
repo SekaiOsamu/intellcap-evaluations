@@ -4,27 +4,13 @@ const cors = require('cors');
 const path = require('path');
 
 const app = express();
-const PORT = process.env.PORT || 3001; // Modification pour Render
+const PORT = 3001;
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
-
-// Configuration spécifique pour Render
-app.use(express.static(path.join(__dirname, 'public'), {
-  extensions: ['html', 'htm'] // Permet de servir les .html sans extension dans l'URL
-}));
-
-// Route pour servir index.html
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-app.get('/dashboard', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
-});
 
 // Initialize DB
 const db = new sqlite3.Database('evaluations.db');
@@ -323,9 +309,8 @@ app.get('/export-csv', (req, res) => {
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(`Frontend available at: http://localhost:${PORT}`);
-  console.log(`Dashboard available at: http://localhost:${PORT}/dashboard`);
+  console.log(`Server running at http://localhost:${PORT}`);
+  console.log(`Dashboard available at http://localhost:${PORT}/dashboard`);
 });
 
 // Graceful shutdown
