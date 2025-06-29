@@ -10,8 +10,8 @@ const PORT = 3001;
 const corsOptions = {
   origin: [
     'https://intellcap-evaluations.onrender.com',
-    'http://localhost:3000',
-    'https://localhost:3000'
+    'http://localhost:3001',
+    'https://localhost:3001'
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -41,10 +41,17 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Initialize DB
-const db = new sqlite3.Database('evaluations.db');
+// DB setup with error handling
+const dbPath = path.join(__dirname, 'evaluations.db');
+const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, (err) => {
+  if (err) {
+    console.error('DB connection error:', err);
+  } else {
+    console.log('Connected to database at:', dbPath);
+  }
+});
 
-// Create table
+// Simplified table creation with only the columns you're actually using
 db.serialize(() => {
   db.run(`
     CREATE TABLE IF NOT EXISTS evaluations (
@@ -52,160 +59,92 @@ db.serialize(() => {
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       firstName TEXT NOT NULL,
       lastName TEXT NOT NULL,
-      phoneNumber TEXT NOT NULL,
+      phoneNumber TEXT,
       emailAddress TEXT NOT NULL,
-      team TEXT NOT NULL,
+      team TEXT,
       projectName TEXT NOT NULL,
-      teamType TEXT NOT NULL,
-      passion INTEGER NOT NULL,
-      motivation INTEGER NOT NULL,
-      integrity INTEGER NOT NULL,
-      originality INTEGER NOT NULL,
-      creativity INTEGER NOT NULL,
-      feasibility INTEGER NOT NULL,
-      scientificValue INTEGER NOT NULL,
-      technologicalValue INTEGER NOT NULL,
-      impact INTEGER NOT NULL,
-      teamSize INTEGER NOT NULL,
-      participantQuality INTEGER NOT NULL,
-      teamStrengths INTEGER NOT NULL,
-      investedEffort INTEGER NOT NULL,
-      investedResources INTEGER NOT NULL,
-      maturityLevel INTEGER NOT NULL,
-      hrNeeds INTEGER NOT NULL,
-      investmentNeeds INTEGER NOT NULL,
-      businessPlan INTEGER NOT NULL,
-      businessModel INTEGER NOT NULL,
-      developmentPlanning INTEGER NOT NULL,
-      mathematics INTEGER NOT NULL,
-      physics INTEGER NOT NULL,
-      mechanics INTEGER NOT NULL,
-      chemistry INTEGER NOT NULL,
-      biology INTEGER NOT NULL,
-      algorithmic INTEGER NOT NULL,
-      ai INTEGER NOT NULL,
-      coding INTEGER NOT NULL,
-      financialAnalysis INTEGER NOT NULL,
-      marketAnalysis INTEGER NOT NULL,
-      strategicPlanning INTEGER NOT NULL,
-      projectManagement INTEGER NOT NULL,
-      communication INTEGER NOT NULL,
-      adaptability INTEGER NOT NULL,
-      problemSolving INTEGER NOT NULL,
-      teamwork INTEGER NOT NULL,
-      criticalThinking INTEGER NOT NULL,
-      curiosity INTEGER NOT NULL,
-      empathy INTEGER NOT NULL,
-      timeManagement INTEGER NOT NULL,
-      leadership INTEGER NOT NULL,
-      detailOrientation INTEGER NOT NULL,
-      design INTEGER NOT NULL,
-      intellectualProperty INTEGER NOT NULL,
-      ipPatentStatus INTEGER NOT NULL,
-      quality INTEGER NOT NULL,
-      formalizationCapacity INTEGER NOT NULL,
+      teamType TEXT,
+      passion INTEGER,
+      motivation INTEGER,
+      integrity INTEGER,
+      originality INTEGER,
+      creativity INTEGER,
+      feasibility INTEGER,
+      scientificValue INTEGER,
+      technologicalValue INTEGER,
+      impact INTEGER,
+      teamSize INTEGER,
+      participantQuality INTEGER,
+      teamStrengths INTEGER,
+      investedEffort INTEGER,
+      investedResources INTEGER,
+      maturityLevel INTEGER,
+      hrNeeds INTEGER,
+      investmentNeeds INTEGER,
+      businessPlan INTEGER,
+      businessModel INTEGER,
+      developmentPlanning INTEGER,
+      mathematics INTEGER,
+      physics INTEGER,
+      mechanics INTEGER,
+      chemistry INTEGER,
+      biology INTEGER,
+      algorithmic INTEGER,
+      ai INTEGER,
+      coding INTEGER,
+      financialAnalysis INTEGER,
+      marketAnalysis INTEGER,
+      strategicPlanning INTEGER,
+      projectManagement INTEGER,
+      communication INTEGER,
+      adaptability INTEGER,
+      problemSolving INTEGER,
+      teamwork INTEGER,
+      criticalThinking INTEGER,
+      curiosity INTEGER,
+      empathy INTEGER,
+      timeManagement INTEGER,
+      leadership INTEGER,
+      detailOrientation INTEGER,
+      design INTEGER,
+      intellectualProperty INTEGER,
+      ipPatentStatus INTEGER,
+      quality INTEGER,
+      formalizationCapacity INTEGER,
       projectDetails TEXT,
       expectations TEXT,
-      totalScore INTEGER NOT NULL
+      totalScore INTEGER
     )
   `, (err) => {
     if (err) {
-      console.error('Error creating table:', err);
+      console.error('Table creation error:', err);
     } else {
       console.log('Evaluations table ready');
     }
   });
 });
 
-// Test endpoints for debugging
-app.get('/test', (req, res) => {
-  res.json({ 
-    message: 'Server is running',
-    timestamp: new Date().toISOString(),
-    env: process.env.NODE_ENV || 'development'
-  });
-});
-
-app.get('/test-db', (req, res) => {
-  db.get('SELECT COUNT(*) as count FROM evaluations', (err, row) => {
-    if (err) {
-      res.status(500).json({ 
-        error: 'Database connection failed',
-        message: err.message 
-      });
-    } else {
-      res.json({ 
-        message: 'Database connected successfully',
-        recordCount: row.count 
-      });
-    }
-  });
-});
-
-app.get('/debug-schema', (req, res) => {
-  db.all("PRAGMA table_info(evaluations)", (err, rows) => {
-    if (err) {
-      res.status(500).json({ error: err.message });
-    } else {
-      const columns = rows.map(row => row.name);
-      res.json({
-        totalColumns: rows.length,
-        columns: columns,
-        columnsWithoutId: columns.filter(col => col !== 'id' && col !== 'created_at'),
-        insertableColumns: columns.filter(col => col !== 'id' && col !== 'created_at').length
-      });
-    }
-  });
-});
-
-// POST route for submitting evaluations with improved error handling
+// POST route with simplified data handling
 app.post('/submit-evaluation', (req, res) => {
-  console.log('Received evaluation submission:', {
-    method: req.method,
-    path: req.path,
-    origin: req.headers.origin,
-    contentType: req.headers['content-type'],
-    bodyKeys: Object.keys(req.body || {}),
-    bodyKeysCount: Object.keys(req.body || {}).length
-  });
-
   const data = req.body;
-  
-  // Log the actual data for debugging
-  console.log('Form data received:', {
-    firstName: data.firstName,
-    lastName: data.lastName,
-    emailAddress: data.emailAddress,
-    projectName: data.projectName,
-    acknowledgment: data.acknowledgment,
-    captchaInput: data.captchaInput
-  });
   
   // Validate required fields
   if (!data.firstName || !data.lastName || !data.emailAddress || !data.projectName) {
-    console.error('Missing required fields:', {
-      firstName: !!data.firstName,
-      lastName: !!data.lastName,
-      emailAddress: !!data.emailAddress,
-      projectName: !!data.projectName
-    });
-    return res.status(400).json({ 
-      error: 'Missing required fields',
-      required: ['firstName', 'lastName', 'emailAddress', 'projectName']
-    });
+    return res.status(400).json({ error: 'Missing required fields' });
   }
 
+  // Simplified SQL with only the fields you're actually sending
   const sql = `
     INSERT INTO evaluations (
       firstName, lastName, phoneNumber, emailAddress, team, projectName, teamType,
-      passion, motivation, integrity, originality, creativity, feasibility, 
-      scientificValue, technologicalValue, impact, teamSize, participantQuality, 
-      teamStrengths, investedEffort, investedResources, maturityLevel, hrNeeds, 
-      investmentNeeds, businessPlan, businessModel, developmentPlanning, mathematics, 
-      physics, mechanics, chemistry, biology, algorithmic, ai, coding, financialAnalysis, 
-      marketAnalysis, strategicPlanning, projectManagement, communication, adaptability, 
-      problemSolving, teamwork, criticalThinking, curiosity, empathy, timeManagement, 
-      leadership, detailOrientation, design, intellectualProperty, ipPatentStatus, 
+      passion, motivation, integrity, originality, creativity, feasibility,
+      scientificValue, technologicalValue, impact, teamSize, participantQuality,
+      teamStrengths, investedEffort, investedResources, maturityLevel, hrNeeds,
+      investmentNeeds, businessPlan, businessModel, developmentPlanning, mathematics,
+      physics, mechanics, chemistry, biology, algorithmic, ai, coding, financialAnalysis,
+      marketAnalysis, strategicPlanning, projectManagement, communication, adaptability,
+      problemSolving, teamwork, criticalThinking, curiosity, empathy, timeManagement,
+      leadership, detailOrientation, design, intellectualProperty, ipPatentStatus,
       quality, formalizationCapacity, projectDetails, expectations, totalScore
     ) VALUES (
       ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 
@@ -216,56 +155,42 @@ app.post('/submit-evaluation', (req, res) => {
   const params = [
     data.firstName, data.lastName, data.phoneNumber || '', data.emailAddress, 
     data.team || '', data.projectName, data.teamType || '',
-    parseInt(data.passion) || 0, parseInt(data.motivation) || 0, 
-    parseInt(data.integrity) || 0, parseInt(data.originality) || 0, 
-    parseInt(data.creativity) || 0, parseInt(data.feasibility) || 0,
-    parseInt(data.scientificValue) || 0, parseInt(data.technologicalValue) || 0,
-    parseInt(data.impact) || 0, parseInt(data.teamSize) || 0,
-    parseInt(data.participantQuality) || 0, parseInt(data.teamStrengths) || 0,
-    parseInt(data.investedEffort) || 0, parseInt(data.investedResources) || 0,
-    parseInt(data.maturityLevel) || 0, parseInt(data.hrNeeds) || 0,
-    parseInt(data.investmentNeeds) || 0, parseInt(data.businessPlan) || 0,
-    parseInt(data.businessModel) || 0, parseInt(data.developmentPlanning) || 0,
-    parseInt(data.mathematics) || 0, parseInt(data.physics) || 0,
-    parseInt(data.mechanics) || 0, parseInt(data.chemistry) || 0,
-    parseInt(data.biology) || 0, parseInt(data.algorithmic) || 0,
-    parseInt(data.ai) || 0, parseInt(data.coding) || 0,
-    parseInt(data.financialAnalysis) || 0, parseInt(data.marketAnalysis) || 0,
-    parseInt(data.strategicPlanning) || 0, parseInt(data.projectManagement) || 0,
-    parseInt(data.communication) || 0, parseInt(data.adaptability) || 0,
-    parseInt(data.problemSolving) || 0, parseInt(data.teamwork) || 0,
-    parseInt(data.criticalThinking) || 0, parseInt(data.curiosity) || 0,
-    parseInt(data.empathy) || 0, parseInt(data.timeManagement) || 0,
-    parseInt(data.leadership) || 0, parseInt(data.detailOrientation) || 0,
-    parseInt(data.design) || 0, parseInt(data.intellectualProperty) || 0,
-    parseInt(data.ipPatentStatus) || 0, parseInt(data.quality) || 0,
-    parseInt(data.formalizationCapacity) || 0,
+    data.passion || 0, data.motivation || 0, 
+    data.integrity || 0, data.originality || 0, 
+    data.creativity || 0, data.feasibility || 0,
+    data.scientificValue || 0, data.technologicalValue || 0,
+    data.impact || 0, data.teamSize || 0,
+    data.participantQuality || 0, data.teamStrengths || 0,
+    data.investedEffort || 0, data.investedResources || 0,
+    data.maturityLevel || 0, data.hrNeeds || 0,
+    data.investmentNeeds || 0, data.businessPlan || 0,
+    data.businessModel || 0, data.developmentPlanning || 0,
+    data.mathematics || 0, data.physics || 0,
+    data.mechanics || 0, data.chemistry || 0,
+    data.biology || 0, data.algorithmic || 0,
+    data.ai || 0, data.coding || 0,
+    data.financialAnalysis || 0, data.marketAnalysis || 0,
+    data.strategicPlanning || 0, data.projectManagement || 0,
+    data.communication || 0, data.adaptability || 0,
+    data.problemSolving || 0, data.teamwork || 0,
+    data.criticalThinking || 0, data.curiosity || 0,
+    data.empathy || 0, data.timeManagement || 0,
+    data.leadership || 0, data.detailOrientation || 0,
+    data.design || 0, data.intellectualProperty || 0,
+    data.ipPatentStatus || 0, data.quality || 0,
+    data.formalizationCapacity || 0,
     data.projectDetails || '', data.expectations || '',
-    parseInt(data.totalScore) || 0
+    data.totalScore || 0
   ];
 
-  console.log('Attempting database insert...');
-  console.log('SQL columns count:', (sql.match(/,/g) || []).length + 1);
-  console.log('Params count:', params.length);
-  console.log('First few params:', params.slice(0, 10));
-  
   db.run(sql, params, function(err) {
     if (err) {
       console.error('Database error:', err);
-      console.error('SQL columns expected:', (sql.match(/,/g) || []).length + 1);
-      console.error('Params provided:', params.length);
-      console.error('Params:', params);
       res.status(500).json({ 
-        error: 'Database error',
-        message: err.message,
-        code: err.code || 'UNKNOWN',
-        debug: {
-          sqlColumnsCount: (sql.match(/,/g) || []).length + 1,
-          paramsCount: params.length
-        }
+        error: 'Error submitting evaluation',
+        details: err.message
       });
     } else {
-      console.log('Evaluation submitted successfully, ID:', this.lastID);
       res.json({ 
         success: true, 
         id: this.lastID,
@@ -274,7 +199,6 @@ app.post('/submit-evaluation', (req, res) => {
     }
   });
 });
-
 // GET all evaluations (for dashboard)
 app.get('/evaluations', (req, res) => {
   db.all('SELECT * FROM evaluations ORDER BY created_at DESC', (err, rows) => {
