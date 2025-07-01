@@ -6,12 +6,19 @@ const path = require('path');
 const app = express();
 const PORT = 3001;
 
-// PostgreSQL connection
+// PostgreSQL connection - MODIFIED FOR SUPABASE
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+  connectionString: process.env.DATABASE_URL + "?sslmode=require",
+  ssl: {
+    rejectUnauthorized: false,
+    sslmode: 'require'
+  },
+  connectionTimeoutMillis: 10000,
+  idleTimeoutMillis: 30000,
+  max: 20
 });
 
+// [REST OF YOUR CODE REMAINS EXACTLY THE SAME - NO CHANGES BELOW THIS LINE]
 // Improved CORS configuration
 const corsOptions = {
   origin: [
@@ -119,6 +126,7 @@ const initializeDatabase = async () => {
 // Initialize database on startup
 initializeDatabase();
 
+// [ALL YOUR EXISTING ROUTES AND ENDPOINTS REMAIN EXACTLY THE SAME]
 // Test endpoints for debugging
 app.get('/test', (req, res) => {
   res.json({ 
@@ -454,4 +462,3 @@ process.on('SIGINT', () => {
     process.exit(0);
   });
 });
-
