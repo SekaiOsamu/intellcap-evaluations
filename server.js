@@ -41,8 +41,16 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Initialize DB
-const db = new sqlite3.Database('evaluations.db');
+
+// Initialize DB (nouvelle version persistante)
+const dbPath = process.env.DATABASE_URL || 'evaluations.db'; // Utilise Render Disk ou local
+const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, (err) => {
+  if (err) {
+    console.error('Erreur de connexion à la DB:', err.message);
+  } else {
+    console.log(`Connecté à la DB sur: ${dbPath}`);
+  }
+});
 
 // Create table
 db.serialize(() => {
