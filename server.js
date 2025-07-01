@@ -1,18 +1,12 @@
 const express = require('express');
-const { Pool } = require('pg');
+const sqlite3 = require('sqlite3').verbose();
 const cors = require('cors');
 const path = require('path');
 
 const app = express();
 const PORT = 3001;
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false
-  }
-});
-
+// Improved CORS configuration
 const corsOptions = {
   origin: [
     'https://intellcap-evaluations.onrender.com',
@@ -22,17 +16,21 @@ const corsOptions = {
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: [
-    'Content-Type',
-    'Authorization',
+    'Content-Type', 
+    'Authorization', 
     'X-Requested-With',
     'Accept',
     'Origin'
   ]
 };
 
+// Middleware
 app.use(cors(corsOptions));
+
+// Handle preflight requests explicitly
 app.options('*', cors(corsOptions));
 
+// Add logging middleware for debugging
 app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
   console.log('Origin:', req.headers.origin);
@@ -43,157 +41,184 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-const initializeDatabase = async () => {
-  try {
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS evaluations (
-        id SERIAL PRIMARY KEY,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        firstName VARCHAR(255) NOT NULL,
-        lastName VARCHAR(255) NOT NULL,
-        phoneNumber VARCHAR(50),
-        emailAddress VARCHAR(255) NOT NULL,
-        team VARCHAR(255),
-        projectName VARCHAR(255) NOT NULL,
-        teamType VARCHAR(100),
-        passion INTEGER NOT NULL DEFAULT 0,
-        motivation INTEGER NOT NULL DEFAULT 0,
-        integrity INTEGER NOT NULL DEFAULT 0,
-        originality INTEGER NOT NULL DEFAULT 0,
-        creativity INTEGER NOT NULL DEFAULT 0,
-        feasibility INTEGER NOT NULL DEFAULT 0,
-        scientificValue INTEGER NOT NULL DEFAULT 0,
-        technologicalValue INTEGER NOT NULL DEFAULT 0,
-        impact INTEGER NOT NULL DEFAULT 0,
-        teamSize INTEGER NOT NULL DEFAULT 0,
-        participantQuality INTEGER NOT NULL DEFAULT 0,
-        teamStrengths INTEGER NOT NULL DEFAULT 0,
-        investedEffort INTEGER NOT NULL DEFAULT 0,
-        investedResources INTEGER NOT NULL DEFAULT 0,
-        maturityLevel INTEGER NOT NULL DEFAULT 0,
-        hrNeeds INTEGER NOT NULL DEFAULT 0,
-        investmentNeeds INTEGER NOT NULL DEFAULT 0,
-        businessPlan INTEGER NOT NULL DEFAULT 0,
-        businessModel INTEGER NOT NULL DEFAULT 0,
-        developmentPlanning INTEGER NOT NULL DEFAULT 0,
-        mathematics INTEGER NOT NULL DEFAULT 0,
-        physics INTEGER NOT NULL DEFAULT 0,
-        mechanics INTEGER NOT NULL DEFAULT 0,
-        chemistry INTEGER NOT NULL DEFAULT 0,
-        biology INTEGER NOT NULL DEFAULT 0,
-        algorithmic INTEGER NOT NULL DEFAULT 0,
-        ai INTEGER NOT NULL DEFAULT 0,
-        coding INTEGER NOT NULL DEFAULT 0,
-        financialAnalysis INTEGER NOT NULL DEFAULT 0,
-        marketAnalysis INTEGER NOT NULL DEFAULT 0,
-        strategicPlanning INTEGER NOT NULL DEFAULT 0,
-        projectManagement INTEGER NOT NULL DEFAULT 0,
-        communication INTEGER NOT NULL DEFAULT 0,
-        adaptability INTEGER NOT NULL DEFAULT 0,
-        problemSolving INTEGER NOT NULL DEFAULT 0,
-        teamwork INTEGER NOT NULL DEFAULT 0,
-        criticalThinking INTEGER NOT NULL DEFAULT 0,
-        curiosity INTEGER NOT NULL DEFAULT 0,
-        empathy INTEGER NOT NULL DEFAULT 0,
-        timeManagement INTEGER NOT NULL DEFAULT 0,
-        leadership INTEGER NOT NULL DEFAULT 0,
-        detailOrientation INTEGER NOT NULL DEFAULT 0,
-        design INTEGER NOT NULL DEFAULT 0,
-        intellectualProperty INTEGER NOT NULL DEFAULT 0,
-        ipPatentStatus INTEGER NOT NULL DEFAULT 0,
-        quality INTEGER NOT NULL DEFAULT 0,
-        formalizationCapacity INTEGER NOT NULL DEFAULT 0,
-        projectDetails TEXT,
-        expectations TEXT,
-        totalScore INTEGER NOT NULL DEFAULT 0
-      )
-    `);
-    console.log('Evaluations table ready (PostgreSQL)');
-  } catch (err) {
-    console.error('Error creating table:', err);
-  }
-};
+// Initialize DB
+const db = new sqlite3.Database('evaluations.db');
 
-initializeDatabase();
-
-app.get('/test', (req, res) => {
-  res.json({
-    message: 'Server is running',
-    timestamp: new Date().toISOString(),
-    env: process.env.NODE_ENV || 'development',
-    database: 'PostgreSQL'
+// Create table
+db.serialize(() => {
+  db.run(`
+    CREATE TABLE IF NOT EXISTS evaluations (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      firstName TEXT NOT NULL,
+      lastName TEXT NOT NULL,
+      phoneNumber TEXT NOT NULL,
+      emailAddress TEXT NOT NULL,
+      team TEXT NOT NULL,
+      projectName TEXT NOT NULL,
+      teamType TEXT NOT NULL,
+      passion INTEGER NOT NULL,
+      motivation INTEGER NOT NULL,
+      integrity INTEGER NOT NULL,
+      originality INTEGER NOT NULL,
+      creativity INTEGER NOT NULL,
+      feasibility INTEGER NOT NULL,
+      scientificValue INTEGER NOT NULL,
+      technologicalValue INTEGER NOT NULL,
+      impact INTEGER NOT NULL,
+      teamSize INTEGER NOT NULL,
+      participantQuality INTEGER NOT NULL,
+      teamStrengths INTEGER NOT NULL,
+      investedEffort INTEGER NOT NULL,
+      investedResources INTEGER NOT NULL,
+      maturityLevel INTEGER NOT NULL,
+      hrNeeds INTEGER NOT NULL,
+      investmentNeeds INTEGER NOT NULL,
+      businessPlan INTEGER NOT NULL,
+      businessModel INTEGER NOT NULL,
+      developmentPlanning INTEGER NOT NULL,
+      mathematics INTEGER NOT NULL,
+      physics INTEGER NOT NULL,
+      mechanics INTEGER NOT NULL,
+      chemistry INTEGER NOT NULL,
+      biology INTEGER NOT NULL,
+      algorithmic INTEGER NOT NULL,
+      ai INTEGER NOT NULL,
+      coding INTEGER NOT NULL,
+      financialAnalysis INTEGER NOT NULL,
+      marketAnalysis INTEGER NOT NULL,
+      strategicPlanning INTEGER NOT NULL,
+      projectManagement INTEGER NOT NULL,
+      communication INTEGER NOT NULL,
+      adaptability INTEGER NOT NULL,
+      problemSolving INTEGER NOT NULL,
+      teamwork INTEGER NOT NULL,
+      criticalThinking INTEGER NOT NULL,
+      curiosity INTEGER NOT NULL,
+      empathy INTEGER NOT NULL,
+      timeManagement INTEGER NOT NULL,
+      leadership INTEGER NOT NULL,
+      detailOrientation INTEGER NOT NULL,
+      design INTEGER NOT NULL,
+      intellectualProperty INTEGER NOT NULL,
+      ipPatentStatus INTEGER NOT NULL,
+      quality INTEGER NOT NULL,
+      formalizationCapacity INTEGER NOT NULL,
+      projectDetails TEXT,
+      expectations TEXT,
+      totalScore INTEGER NOT NULL
+    )
+  `, (err) => {
+    if (err) {
+      console.error('Error creating table:', err);
+    } else {
+      console.log('Evaluations table ready');
+    }
   });
 });
 
-app.get('/test-db', async (req, res) => {
-  try {
-    const result = await pool.query('SELECT COUNT(*) as count FROM evaluations');
-    res.json({
-      message: 'Database connected successfully (PostgreSQL)',
-      recordCount: parseInt(result.rows[0].count)
-    });
-  } catch (err) {
-    res.status(500).json({
-      error: 'Database connection failed',
-      message: err.message
-    });
-  }
+// Test endpoints for debugging
+app.get('/test', (req, res) => {
+  res.json({ 
+    message: 'Server is running',
+    timestamp: new Date().toISOString(),
+    env: process.env.NODE_ENV || 'development'
+  });
 });
 
-app.get('/debug-schema', async (req, res) => {
-  try {
-    const result = await pool.query(`
-      SELECT column_name
-      FROM information_schema.columns
-      WHERE table_name = 'evaluations'
-      ORDER BY ordinal_position
-    `);
-    const columns = result.rows.map(row => row.column_name);
-    res.json({
-      totalColumns: columns.length,
-      columns: columns,
-      columnsWithoutId: columns.filter(col => col !== 'id' && col !== 'created_at'),
-      insertableColumns: columns.filter(col => col !== 'id' && col !== 'created_at').length
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+app.get('/test-db', (req, res) => {
+  db.get('SELECT COUNT(*) as count FROM evaluations', (err, row) => {
+    if (err) {
+      res.status(500).json({ 
+        error: 'Database connection failed',
+        message: err.message 
+      });
+    } else {
+      res.json({ 
+        message: 'Database connected successfully',
+        recordCount: row.count 
+      });
+    }
+  });
 });
 
-app.post('/submit-evaluation', async (req, res) => {
+app.get('/debug-schema', (req, res) => {
+  db.all("PRAGMA table_info(evaluations)", (err, rows) => {
+    if (err) {
+      res.status(500).json({ error: err.message });
+    } else {
+      const columns = rows.map(row => row.name);
+      res.json({
+        totalColumns: rows.length,
+        columns: columns,
+        columnsWithoutId: columns.filter(col => col !== 'id' && col !== 'created_at'),
+        insertableColumns: columns.filter(col => col !== 'id' && col !== 'created_at').length
+      });
+    }
+  });
+});
+
+// POST route for submitting evaluations with improved error handling
+app.post('/submit-evaluation', (req, res) => {
+  console.log('Received evaluation submission:', {
+    method: req.method,
+    path: req.path,
+    origin: req.headers.origin,
+    contentType: req.headers['content-type'],
+    bodyKeys: Object.keys(req.body || {}),
+    bodyKeysCount: Object.keys(req.body || {}).length
+  });
+
   const data = req.body;
-
+  
+  // Log the actual data for debugging
+  console.log('Form data received:', {
+    firstName: data.firstName,
+    lastName: data.lastName,
+    emailAddress: data.emailAddress,
+    projectName: data.projectName,
+    acknowledgment: data.acknowledgment,
+    captchaInput: data.captchaInput
+  });
+  
+  // Validate required fields
   if (!data.firstName || !data.lastName || !data.emailAddress || !data.projectName) {
-    return res.status(400).json({
+    console.error('Missing required fields:', {
+      firstName: !!data.firstName,
+      lastName: !!data.lastName,
+      emailAddress: !!data.emailAddress,
+      projectName: !!data.projectName
+    });
+    return res.status(400).json({ 
       error: 'Missing required fields',
       required: ['firstName', 'lastName', 'emailAddress', 'projectName']
     });
   }
 
+  // Fixed SQL with correct number of placeholders (57 columns = 57 placeholders)
   const sql = `
     INSERT INTO evaluations (
       firstName, lastName, phoneNumber, emailAddress, team, projectName, teamType,
-      passion, motivation, integrity, originality, creativity, feasibility,
-      scientificValue, technologicalValue, impact, teamSize, participantQuality,
-      teamStrengths, investedEffort, investedResources, maturityLevel, hrNeeds,
-      investmentNeeds, businessPlan, businessModel, developmentPlanning, mathematics,
-      physics, mechanics, chemistry, biology, algorithmic, ai, coding, financialAnalysis,
-      marketAnalysis, strategicPlanning, projectManagement, communication, adaptability,
-      problemSolving, teamwork, criticalThinking, curiosity, empathy, timeManagement,
-      leadership, detailOrientation, design, intellectualProperty, ipPatentStatus,
+      passion, motivation, integrity, originality, creativity, feasibility, 
+      scientificValue, technologicalValue, impact, teamSize, participantQuality, 
+      teamStrengths, investedEffort, investedResources, maturityLevel, hrNeeds, 
+      investmentNeeds, businessPlan, businessModel, developmentPlanning, mathematics, 
+      physics, mechanics, chemistry, biology, algorithmic, ai, coding, financialAnalysis, 
+      marketAnalysis, strategicPlanning, projectManagement, communication, adaptability, 
+      problemSolving, teamwork, criticalThinking, curiosity, empathy, timeManagement, 
+      leadership, detailOrientation, design, intellectualProperty, ipPatentStatus, 
       quality, formalizationCapacity, projectDetails, expectations, totalScore
     ) VALUES (
-      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18,
-      $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34,
-      $35, $36, $37, $38, $39, $40, $41, $42, $43, $44, $45, $46, $47, $48, $49, $50,
-      $51, $52, $53, $54, $55, $56, $57
-    ) RETURNING id`;
+      ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 
+      ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 
+      ?, ?, ?, ?, ?, ?
+    )`;
 
   const params = [
-    data.firstName, data.lastName, data.phoneNumber || '', data.emailAddress,
+    data.firstName, data.lastName, data.phoneNumber || '', data.emailAddress, 
     data.team || '', data.projectName, data.teamType || '',
-    parseInt(data.passion) || 0, parseInt(data.motivation) || 0,
-    parseInt(data.integrity) || 0, parseInt(data.originality) || 0,
+    parseInt(data.passion) || 0, parseInt(data.motivation) || 0, 
+    parseInt(data.integrity) || 0, parseInt(data.originality) || 0, 
     parseInt(data.creativity) || 0, parseInt(data.feasibility) || 0,
     parseInt(data.scientificValue) || 0, parseInt(data.technologicalValue) || 0,
     parseInt(data.impact) || 0, parseInt(data.teamSize) || 0,
@@ -220,60 +245,82 @@ app.post('/submit-evaluation', async (req, res) => {
     parseInt(data.totalScore) || 0
   ];
 
-  try {
-    const result = await pool.query(sql, params);
-    res.json({
-      success: true,
-      id: result.rows[0].id,
-      message: 'Evaluation submitted successfully'
-    });
-  } catch (err) {
-    res.status(500).json({
-      error: 'Database error',
-      message: err.message,
-      code: err.code || 'UNKNOWN'
-    });
-  }
-});
-
-app.get('/evaluations', async (req, res) => {
-  try {
-    const result = await pool.query('SELECT * FROM evaluations ORDER BY created_at DESC');
-    res.json(result.rows);
-  } catch (err) {
-    res.status(500).json({ error: 'Error retrieving evaluations' });
-  }
-});
-
-app.get('/evaluations/:id', async (req, res) => {
-  try {
-    const result = await pool.query('SELECT * FROM evaluations WHERE id = $1', [req.params.id]);
-    if (result.rows.length === 0) {
-      res.status(404).json({ error: 'Evaluation not found' });
+  console.log('Attempting database insert...');
+  console.log('SQL columns count:', (sql.match(/\?/g) || []).length);
+  console.log('Params count:', params.length);
+  console.log('First few params:', params.slice(0, 10));
+  
+  db.run(sql, params, function(err) {
+    if (err) {
+      console.error('Database error:', err);
+      console.error('SQL placeholders count:', (sql.match(/\?/g) || []).length);
+      console.error('Params provided:', params.length);
+      console.error('Params:', params);
+      res.status(500).json({ 
+        error: 'Database error',
+        message: err.message,
+        code: err.code || 'UNKNOWN',
+        debug: {
+          sqlPlaceholdersCount: (sql.match(/\?/g) || []).length,
+          paramsCount: params.length
+        }
+      });
     } else {
-      res.json(result.rows[0]);
+      console.log('Evaluation submitted successfully, ID:', this.lastID);
+      res.json({ 
+        success: true, 
+        id: this.lastID,
+        message: 'Evaluation submitted successfully'
+      });
     }
-  } catch (err) {
-    res.status(500).json({ error: 'Error retrieving evaluation' });
-  }
+  });
 });
 
-app.get('/evaluation-metrics/:id', async (req, res) => {
-  try {
-    const result = await pool.query('SELECT * FROM evaluations WHERE id = $1', [req.params.id]);
-    if (result.rows.length === 0) {
+// GET all evaluations (for dashboard)
+app.get('/evaluations', (req, res) => {
+  db.all('SELECT * FROM evaluations ORDER BY created_at DESC', (err, rows) => {
+    if (err) {
+      console.error('Error retrieving evaluations:', err);
+      res.status(500).json({ error: 'Error retrieving evaluations' });
+    } else {
+      res.json(rows);
+    }
+  });
+});
+
+// GET single evaluation (detailed view)
+app.get('/evaluations/:id', (req, res) => {
+  db.get('SELECT * FROM evaluations WHERE id = ?', [req.params.id], (err, row) => {
+    if (err) {
+      console.error('Error retrieving evaluation:', err);
+      res.status(500).json({ error: 'Error retrieving evaluation' });
+    } else if (!row) {
       res.status(404).json({ error: 'Evaluation not found' });
     } else {
-      const row = result.rows[0];
+      res.json(row);
+    }
+  });
+});
+
+// GET evaluation metrics (organized by category)
+app.get('/evaluation-metrics/:id', (req, res) => {
+  db.get('SELECT * FROM evaluations WHERE id = ?', [req.params.id], (err, row) => {
+    if (err) {
+      console.error('Error retrieving evaluation metrics:', err);
+      res.status(500).json({ error: 'Error retrieving evaluation metrics' });
+    } else if (!row) {
+      res.status(404).json({ error: 'Evaluation not found' });
+    } else {
+      // Organize metrics by category
       const metrics = {
         personalInfo: {
-          firstName: row.firstname,
-          lastName: row.lastname,
-          email: row.emailaddress,
-          phone: row.phonenumber,
+          firstName: row.firstName,
+          lastName: row.lastName,
+          email: row.emailAddress,
+          phone: row.phoneNumber,
           team: row.team,
-          project: row.projectname,
-          teamType: row.teamtype
+          project: row.projectName,
+          teamType: row.teamType
         },
         keyQualities: {
           passion: row.passion,
@@ -284,26 +331,26 @@ app.get('/evaluation-metrics/:id', async (req, res) => {
           originality: row.originality,
           creativity: row.creativity,
           feasibility: row.feasibility,
-          scientificValue: row.scientificvalue,
-          technologicalValue: row.technologicalvalue,
+          scientificValue: row.scientificValue,
+          technologicalValue: row.technologicalValue,
           impact: row.impact
         },
         teamComposition: {
-          teamSize: row.teamsize,
-          participantQuality: row.participantquality,
-          teamStrengths: row.teamstrengths,
-          investedEffort: row.investedeffort,
-          investedResources: row.investedresources
+          teamSize: row.teamSize,
+          participantQuality: row.participantQuality,
+          teamStrengths: row.teamStrengths,
+          investedEffort: row.investedEffort,
+          investedResources: row.investedResources
         },
         projectMaturity: {
-          maturityLevel: row.maturitylevel,
-          hrNeeds: row.hrneeds,
-          investmentNeeds: row.investmentneeds
+          maturityLevel: row.maturityLevel,
+          hrNeeds: row.hrNeeds,
+          investmentNeeds: row.investmentNeeds
         },
         businessDevelopment: {
-          businessPlan: row.businessplan,
-          businessModel: row.businessmodel,
-          developmentPlanning: row.developmentplanning
+          businessPlan: row.businessPlan,
+          businessModel: row.businessModel,
+          developmentPlanning: row.developmentPlanning
         },
         technicalSkills: {
           mathematics: row.mathematics,
@@ -316,59 +363,57 @@ app.get('/evaluation-metrics/:id', async (req, res) => {
           coding: row.coding
         },
         businessSkills: {
-          financialAnalysis: row.financialanalysis,
-          marketAnalysis: row.marketanalysis,
-          strategicPlanning: row.strategicplanning,
-          projectManagement: row.projectmanagement
+          financialAnalysis: row.financialAnalysis,
+          marketAnalysis: row.marketAnalysis,
+          strategicPlanning: row.strategicPlanning,
+          projectManagement: row.projectManagement
         },
         softSkills: {
           communication: row.communication,
           adaptability: row.adaptability,
-          problemSolving: row.problemsolving,
+          problemSolving: row.problemSolving,
           teamwork: row.teamwork,
-          criticalThinking: row.criticalthinking,
+          criticalThinking: row.criticalThinking,
           curiosity: row.curiosity,
           empathy: row.empathy,
-          timeManagement: row.timemanagement,
+          timeManagement: row.timeManagement,
           leadership: row.leadership,
-          detailOrientation: row.detailorientation
+          detailOrientation: row.detailOrientation
         },
         additionalCriteria: {
           design: row.design,
-          intellectualProperty: row.intellectualproperty,
-          ipPatentStatus: row.ippatentStatus,
+          intellectualProperty: row.intellectualProperty,
+          ipPatentStatus: row.ipPatentStatus,
           quality: row.quality,
-          formalizationCapacity: row.formalizationcapacity
+          formalizationCapacity: row.formalizationCapacity
         },
-        projectDetails: row.projectdetails || '',
+        projectDetails: row.projectDetails || '',
         expectations: row.expectations || '',
-        totalScore: row.totalscore,
+        totalScore: row.totalScore,
         createdAt: row.created_at
       };
       res.json(metrics);
     }
-  } catch (err) {
-    res.status(500).json({ error: 'Error retrieving evaluation metrics' });
-  }
-});
-
-app.get('/dashboard', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'dashboard.html'), (err) => {
-    if (err) {
-      res.status(404).send('Dashboard not found');
-    }
   });
 });
 
-app.get('/export-csv', async (req, res) => {
-  try {
-    const result = await pool.query('SELECT * FROM evaluations ORDER BY created_at DESC');
-    if (result.rows.length === 0) {
+// Serve dashboard page
+app.get('/dashboard', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
+});
+
+// Export CSV
+app.get('/export-csv', (req, res) => {
+  db.all('SELECT * FROM evaluations ORDER BY created_at DESC', (err, rows) => {
+    if (err) {
+      console.error('Error exporting data:', err);
+      res.status(500).json({ error: 'Error exporting data' });
+    } else if (rows.length === 0) {
       res.status(404).send('No data available');
     } else {
-      const keys = Object.keys(result.rows[0]);
+      const keys = Object.keys(rows[0]);
       let csv = keys.join(',') + '\n';
-      result.rows.forEach(row => {
+      rows.forEach(row => {
         const line = keys.map(k => `"${(row[k] || '').toString().replace(/"/g, '""')}"`).join(',');
         csv += line + '\n';
       });
@@ -376,14 +421,13 @@ app.get('/export-csv', async (req, res) => {
       res.setHeader('Content-Disposition', 'attachment; filename="evaluations.csv"');
       res.send(csv);
     }
-  } catch (err) {
-    res.status(500).json({ error: 'Error exporting data' });
-  }
+  });
 });
 
+// Root endpoint
 app.get('/', (req, res) => {
   res.json({
-    message: 'Evaluation API Server (PostgreSQL)',
+    message: 'Evaluation API Server',
     endpoints: {
       test: '/test',
       testDb: '/test-db',
@@ -395,13 +439,22 @@ app.get('/', (req, res) => {
   });
 });
 
+// Start server
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
   console.log(`Dashboard available at http://localhost:${PORT}/dashboard`);
+  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
 });
 
+// Graceful shutdown
 process.on('SIGINT', () => {
-  pool.end(() => {
+  console.log('Shutting down gracefully...');
+  db.close((err) => {
+    if (err) {
+      console.error('Error closing database:', err);
+    } else {
+      console.log('Database connection closed.');
+    }
     process.exit(0);
   });
 });
