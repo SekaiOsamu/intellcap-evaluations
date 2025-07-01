@@ -6,20 +6,13 @@ const path = require('path');
 const app = express();
 const PORT = 3001;
 
-// PostgreSQL connection - MODIFIED FOR SUPABASE
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL + "?sslmode=require",
+  connectionString: process.env.DATABASE_URL,
   ssl: {
-    rejectUnauthorized: false,
-    sslmode: 'require'
-  },
-  connectionTimeoutMillis: 10000,
-  idleTimeoutMillis: 30000,
-  max: 20
+    rejectUnauthorized: false
+  }
 });
 
-// [REST OF YOUR CODE REMAINS EXACTLY THE SAME - NO CHANGES BELOW THIS LINE]
-// Improved CORS configuration
 const corsOptions = {
   origin: [
     'https://intellcap-evaluations.onrender.com',
@@ -29,15 +22,14 @@ const corsOptions = {
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: [
-    'Content-Type', 
-    'Authorization', 
+    'Content-Type',
+    'Authorization',
     'X-Requested-With',
     'Accept',
     'Origin'
   ]
 };
 
-// Middleware
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
 
@@ -51,7 +43,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Initialize DB - Create table if not exists
 const initializeDatabase = async () => {
   try {
     await pool.query(`
@@ -123,13 +114,10 @@ const initializeDatabase = async () => {
   }
 };
 
-// Initialize database on startup
 initializeDatabase();
 
-// [ALL YOUR EXISTING ROUTES AND ENDPOINTS REMAIN EXACTLY THE SAME]
-// Test endpoints for debugging
 app.get('/test', (req, res) => {
-  res.json({ 
+  res.json({
     message: 'Server is running',
     timestamp: new Date().toISOString(),
     env: process.env.NODE_ENV || 'development',
@@ -140,14 +128,14 @@ app.get('/test', (req, res) => {
 app.get('/test-db', async (req, res) => {
   try {
     const result = await pool.query('SELECT COUNT(*) as count FROM evaluations');
-    res.json({ 
+    res.json({
       message: 'Database connected successfully (PostgreSQL)',
       recordCount: parseInt(result.rows[0].count)
     });
   } catch (err) {
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'Database connection failed',
-      message: err.message 
+      message: err.message
     });
   }
 });
@@ -155,9 +143,9 @@ app.get('/test-db', async (req, res) => {
 app.get('/debug-schema', async (req, res) => {
   try {
     const result = await pool.query(`
-      SELECT column_name 
-      FROM information_schema.columns 
-      WHERE table_name = 'evaluations' 
+      SELECT column_name
+      FROM information_schema.columns
+      WHERE table_name = 'evaluations'
       ORDER BY ordinal_position
     `);
     const columns = result.rows.map(row => row.column_name);
@@ -172,67 +160,40 @@ app.get('/debug-schema', async (req, res) => {
   }
 });
 
-// POST route for submitting evaluations
 app.post('/submit-evaluation', async (req, res) => {
-  console.log('Received evaluation submission:', {
-    method: req.method,
-    path: req.path,
-    origin: req.headers.origin,
-    contentType: req.headers['content-type'],
-    bodyKeys: Object.keys(req.body || {}),
-    bodyKeysCount: Object.keys(req.body || {}).length
-  });
-
   const data = req.body;
-  
-  console.log('Form data received:', {
-    firstName: data.firstName,
-    lastName: data.lastName,
-    emailAddress: data.emailAddress,
-    projectName: data.projectName,
-    acknowledgment: data.acknowledgment,
-    captchaInput: data.captchaInput
-  });
-  
-  // Validate required fields
+
   if (!data.firstName || !data.lastName || !data.emailAddress || !data.projectName) {
-    console.error('Missing required fields:', {
-      firstName: !!data.firstName,
-      lastName: !!data.lastName,
-      emailAddress: !!data.emailAddress,
-      projectName: !!data.projectName
-    });
-    return res.status(400).json({ 
+    return res.status(400).json({
       error: 'Missing required fields',
       required: ['firstName', 'lastName', 'emailAddress', 'projectName']
     });
   }
 
-  // PostgreSQL SQL with numbered parameters
   const sql = `
     INSERT INTO evaluations (
       firstName, lastName, phoneNumber, emailAddress, team, projectName, teamType,
-      passion, motivation, integrity, originality, creativity, feasibility, 
-      scientificValue, technologicalValue, impact, teamSize, participantQuality, 
-      teamStrengths, investedEffort, investedResources, maturityLevel, hrNeeds, 
-      investmentNeeds, businessPlan, businessModel, developmentPlanning, mathematics, 
-      physics, mechanics, chemistry, biology, algorithmic, ai, coding, financialAnalysis, 
-      marketAnalysis, strategicPlanning, projectManagement, communication, adaptability, 
-      problemSolving, teamwork, criticalThinking, curiosity, empathy, timeManagement, 
-      leadership, detailOrientation, design, intellectualProperty, ipPatentStatus, 
+      passion, motivation, integrity, originality, creativity, feasibility,
+      scientificValue, technologicalValue, impact, teamSize, participantQuality,
+      teamStrengths, investedEffort, investedResources, maturityLevel, hrNeeds,
+      investmentNeeds, businessPlan, businessModel, developmentPlanning, mathematics,
+      physics, mechanics, chemistry, biology, algorithmic, ai, coding, financialAnalysis,
+      marketAnalysis, strategicPlanning, projectManagement, communication, adaptability,
+      problemSolving, teamwork, criticalThinking, curiosity, empathy, timeManagement,
+      leadership, detailOrientation, design, intellectualProperty, ipPatentStatus,
       quality, formalizationCapacity, projectDetails, expectations, totalScore
     ) VALUES (
-      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, 
-      $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, 
-      $35, $36, $37, $38, $39, $40, $41, $42, $43, $44, $45, $46, $47, $48, $49, $50, 
+      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18,
+      $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34,
+      $35, $36, $37, $38, $39, $40, $41, $42, $43, $44, $45, $46, $47, $48, $49, $50,
       $51, $52, $53, $54, $55, $56, $57
     ) RETURNING id`;
 
   const params = [
-    data.firstName, data.lastName, data.phoneNumber || '', data.emailAddress, 
+    data.firstName, data.lastName, data.phoneNumber || '', data.emailAddress,
     data.team || '', data.projectName, data.teamType || '',
-    parseInt(data.passion) || 0, parseInt(data.motivation) || 0, 
-    parseInt(data.integrity) || 0, parseInt(data.originality) || 0, 
+    parseInt(data.passion) || 0, parseInt(data.motivation) || 0,
+    parseInt(data.integrity) || 0, parseInt(data.originality) || 0,
     parseInt(data.creativity) || 0, parseInt(data.feasibility) || 0,
     parseInt(data.scientificValue) || 0, parseInt(data.technologicalValue) || 0,
     parseInt(data.impact) || 0, parseInt(data.teamSize) || 0,
@@ -259,20 +220,15 @@ app.post('/submit-evaluation', async (req, res) => {
     parseInt(data.totalScore) || 0
   ];
 
-  console.log('Attempting database insert...');
-  console.log('Params count:', params.length);
-  
   try {
     const result = await pool.query(sql, params);
-    console.log('Evaluation submitted successfully, ID:', result.rows[0].id);
-    res.json({ 
-      success: true, 
+    res.json({
+      success: true,
       id: result.rows[0].id,
       message: 'Evaluation submitted successfully'
     });
   } catch (err) {
-    console.error('Database error:', err);
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'Database error',
       message: err.message,
       code: err.code || 'UNKNOWN'
@@ -280,18 +236,15 @@ app.post('/submit-evaluation', async (req, res) => {
   }
 });
 
-// GET all evaluations (for dashboard)
 app.get('/evaluations', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM evaluations ORDER BY created_at DESC');
     res.json(result.rows);
   } catch (err) {
-    console.error('Error retrieving evaluations:', err);
     res.status(500).json({ error: 'Error retrieving evaluations' });
   }
 });
 
-// GET single evaluation (detailed view)
 app.get('/evaluations/:id', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM evaluations WHERE id = $1', [req.params.id]);
@@ -301,12 +254,10 @@ app.get('/evaluations/:id', async (req, res) => {
       res.json(result.rows[0]);
     }
   } catch (err) {
-    console.error('Error retrieving evaluation:', err);
     res.status(500).json({ error: 'Error retrieving evaluation' });
   }
 });
 
-// GET evaluation metrics (organized by category)
 app.get('/evaluation-metrics/:id', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM evaluations WHERE id = $1', [req.params.id]);
@@ -314,7 +265,6 @@ app.get('/evaluation-metrics/:id', async (req, res) => {
       res.status(404).json({ error: 'Evaluation not found' });
     } else {
       const row = result.rows[0];
-      // Same organization logic as before
       const metrics = {
         personalInfo: {
           firstName: row.firstname,
@@ -398,17 +348,18 @@ app.get('/evaluation-metrics/:id', async (req, res) => {
       res.json(metrics);
     }
   } catch (err) {
-    console.error('Error retrieving evaluation metrics:', err);
     res.status(500).json({ error: 'Error retrieving evaluation metrics' });
   }
 });
 
-// Serve dashboard page
 app.get('/dashboard', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
+  res.sendFile(path.join(__dirname, 'public', 'dashboard.html'), (err) => {
+    if (err) {
+      res.status(404).send('Dashboard not found');
+    }
+  });
 });
 
-// Export CSV
 app.get('/export-csv', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM evaluations ORDER BY created_at DESC');
@@ -426,12 +377,10 @@ app.get('/export-csv', async (req, res) => {
       res.send(csv);
     }
   } catch (err) {
-    console.error('Error exporting data:', err);
     res.status(500).json({ error: 'Error exporting data' });
   }
 });
 
-// Root endpoint
 app.get('/', (req, res) => {
   res.json({
     message: 'Evaluation API Server (PostgreSQL)',
@@ -446,19 +395,13 @@ app.get('/', (req, res) => {
   });
 });
 
-// Start server
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
   console.log(`Dashboard available at http://localhost:${PORT}/dashboard`);
-  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log('Database: PostgreSQL');
 });
 
-// Graceful shutdown
 process.on('SIGINT', () => {
-  console.log('Shutting down gracefully...');
   pool.end(() => {
-    console.log('Database pool closed.');
     process.exit(0);
   });
 });
